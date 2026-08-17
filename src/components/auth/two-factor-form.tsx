@@ -23,7 +23,9 @@ export function TwoFactorForm() {
     setError("");
     const result = await authClient.twoFactor.sendOtp().finally(() => setSending(false));
     if (result.error) {
-      setError(result.error.message ?? "Unable to send a security code. Sign in again.");
+      const message = result.error.message ?? "Unable to send a security code. Sign in again.";
+      setError(message);
+      toast.error(message);
       return;
     }
     if (showToast) toast.success("A new security code was sent to your Gmail inbox.");
@@ -41,7 +43,9 @@ export function TwoFactorForm() {
     const code = String(formData.get("code")).replace(/\D/g, "");
     const result = await authClient.twoFactor.verifyOtp({ code, trustDevice: false }).finally(() => setPending(false));
     if (result.error) {
-      setError(result.error.message ?? "The security code is invalid or expired.");
+      const message = result.error.message ?? "The security code is invalid or expired.";
+      setError(message);
+      toast.error(message);
       return;
     }
     toast.success("Identity confirmed. Welcome back.");
@@ -50,7 +54,7 @@ export function TwoFactorForm() {
   }
 
   return (
-    <form action={submit}>
+    <form onSubmit={(event) => { event.preventDefault(); void submit(new FormData(event.currentTarget)); }}>
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="security-code">Security code</FieldLabel>

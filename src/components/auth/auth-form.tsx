@@ -32,11 +32,13 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     if (isSignUp && password !== String(formData.get("confirmPassword"))) {
       setPending(false);
       setError("Passwords do not match");
+      toast.error("Passwords do not match.");
       return;
     }
     if (!/^[^\s@]+@gmail\.com$/i.test(email.trim())) {
       setPending(false);
       setError("Use a valid Gmail address ending in @gmail.com.");
+      toast.error("Use a valid Gmail address ending in @gmail.com.");
       return;
     }
     const result = await (isSignUp
@@ -46,8 +48,12 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           name: String(formData.get("name")),
         })
       : authClient.signIn.email({ email, password })).finally(() => setPending(false));
-    if (result.error)
-      return setError(result.error.message ?? "Unable to continue");
+    if (result.error) {
+      const message = result.error.message ?? "Unable to continue";
+      setError(message);
+      toast.error(message);
+      return;
+    }
     if (isSignUp) {
       toast.success("Verification code sent. Check your Gmail inbox to finish creating your account.");
       router.push(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
@@ -62,7 +68,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   }
 
   return (
-    <form action={submit}>
+    <form onSubmit={(event) => { event.preventDefault(); void submit(new FormData(event.currentTarget)); }}>
       <FieldGroup>
         {isSignUp && (
           <Field>
@@ -101,7 +107,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             maxLength={128}
             required
           />
-          <FieldDescription>Use between 10 and 128 characters.</FieldDescription>
+          {isSignUp && <FieldDescription>Use between 10 and 128 characters.</FieldDescription>}
         </Field>
         {isSignUp && <Field>
           <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>

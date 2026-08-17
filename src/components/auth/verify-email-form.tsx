@@ -27,7 +27,9 @@ export function VerifyEmailForm() {
     const otp = String(formData.get("otp")).replace(/\D/g, "");
     const result = await authClient.emailOtp.verifyEmail({ email, otp }).finally(() => setPending(false));
     if (result.error) {
-      setError(result.error.message ?? "The verification code is invalid or expired.");
+      const message = result.error.message ?? "The verification code is invalid or expired.";
+      setError(message);
+      toast.error(message);
       return;
     }
     toast.success("Account verified and ready. You can now sign in securely.");
@@ -40,7 +42,9 @@ export function VerifyEmailForm() {
     setError("");
     const result = await authClient.emailOtp.sendVerificationOtp({ email, type: "email-verification" }).finally(() => setResending(false));
     if (result.error) {
-      setError(result.error.message ?? "A new code could not be sent yet.");
+      const message = result.error.message ?? "A new code could not be sent yet.";
+      setError(message);
+      toast.error(message);
       return;
     }
     toast.success("A new verification code was sent to your Gmail inbox.");
@@ -49,7 +53,7 @@ export function VerifyEmailForm() {
   if (!email) return <Field data-invalid><FieldError>The verification link is missing an email address.</FieldError><FieldDescription><Link href="/sign-up" className="font-medium text-primary underline-offset-4 hover:underline">Return to registration</Link></FieldDescription></Field>;
 
   return (
-    <form action={verify}>
+    <form onSubmit={(event) => { event.preventDefault(); void verify(new FormData(event.currentTarget)); }}>
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="account-verification-code">Verification code</FieldLabel>

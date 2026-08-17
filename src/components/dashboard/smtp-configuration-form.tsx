@@ -23,7 +23,7 @@ export function SmtpConfigurationForm() {
     }
   }
   return (
-    <form action={submit}>
+    <form onSubmit={(event) => { event.preventDefault(); void submit(new FormData(event.currentTarget)); }}>
       <FieldGroup>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field><FieldLabel htmlFor="label">Configuration name</FieldLabel><Input id="label" name="label" placeholder="Production SMTP" required /></Field>
