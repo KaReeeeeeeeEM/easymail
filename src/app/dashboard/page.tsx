@@ -15,7 +15,7 @@ import { auth } from "@/lib/auth";
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const organizationId = session?.session.activeOrganizationId;
-  if (!organizationId) return <div className="flex flex-col gap-6"><div><p className="text-sm font-medium text-primary">Welcome to easymail</p><h1 className="text-3xl font-semibold tracking-tight">Set up your email service</h1></div><WorkspaceSetup /></div>;
+  if (!organizationId) return <div className="flex flex-col gap-8"><PageHeading eyebrow="Workspace overview" title="Delivery overview" description="Choose a workspace to monitor email delivery, API usage, and sender health." /><WorkspaceSetup /></div>;
   const data = await getDashboardData(organizationId);
   const cards = [
     { label: "Requests", value: data.metrics.total, detail: "Last 14 days", icon: Send },
