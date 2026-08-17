@@ -22,6 +22,13 @@
       "when": 1786976593077,
       "tag": "0002_windy_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786979715638,
+      "tag": "0003_lush_whirlwind",
+      "breakpoints": true
     }
   ]
 }

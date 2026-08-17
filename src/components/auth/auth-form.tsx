@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
+import { Spinner } from "@/components/ui/spinner";
 
 export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const router = useRouter();
@@ -39,14 +39,13 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       setError("Use a valid Gmail address ending in @gmail.com.");
       return;
     }
-    const result = isSignUp
-      ? await authClient.signUp.email({
+    const result = await (isSignUp
+      ? authClient.signUp.email({
           email,
           password,
           name: String(formData.get("name")),
         })
-      : await authClient.signIn.email({ email, password });
-    setPending(false);
+      : authClient.signIn.email({ email, password })).finally(() => setPending(false));
     if (result.error)
       return setError(result.error.message ?? "Unable to continue");
     if (isSignUp) {
@@ -114,10 +113,8 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           </Field>
         )}
         <Button type="submit" disabled={pending}>
-          {pending && (
-            <LoaderCircle data-icon="inline-start" className="animate-spin" />
-          )}
-          {isSignUp ? "Create account" : "Sign in"}
+          {pending && <Spinner data-icon="inline-start" />}
+          {pending ? (isSignUp ? "Creating account…" : "Signing in…") : (isSignUp ? "Create account" : "Sign in")}
         </Button>
         {!isSignUp && <FieldDescription className="text-center"><Link className="font-medium text-primary underline-offset-4 hover:underline" href="/forgot-password">Forgot your password?</Link></FieldDescription>}
         <FieldDescription className="text-center">

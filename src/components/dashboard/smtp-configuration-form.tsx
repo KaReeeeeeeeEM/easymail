@@ -8,15 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
+import { Spinner } from "@/components/ui/spinner";
 
 export function SmtpConfigurationForm() {
   const [pending, setPending] = useState(false);
   async function submit(formData: FormData) {
     setPending(true);
-    const result = await configureSmtp(formData);
-    setPending(false);
-    if (result.success) toast.success(result.message);
-    else toast.error(result.message);
+    try {
+      const result = await configureSmtp(formData);
+      if (result.success) toast.success(result.message);
+      else toast.error(result.message);
+    } finally {
+      setPending(false);
+    }
   }
   return (
     <form action={submit}>
@@ -33,7 +37,7 @@ export function SmtpConfigurationForm() {
         </div>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isDefault" className="accent-primary" /> Use as the default sender</label>
         <FieldDescription>Credentials are verified with the SMTP server before the encrypted password is stored.</FieldDescription>
-        <Button type="submit" disabled={pending}>{pending ? "Verifying…" : "Verify and save sender"}</Button>
+        <Button type="submit" disabled={pending}>{pending && <Spinner data-icon="inline-start" />}{pending ? "Verifying sender…" : "Verify and save sender"}</Button>
       </FieldGroup>
     </form>
   );

@@ -75,7 +75,21 @@ export const auth = betterAuth({
       await sendVerificationEmail({ email: user.email, name: user.name, url });
     },
   },
-  rateLimit: { enabled: true, window: 60, max: 100 },
+  rateLimit: {
+    enabled: true,
+    storage: "database",
+    window: 60,
+    max: 60,
+    customRules: {
+      "/api/auth/sign-up/email": { window: 60, max: 3 },
+      "/api/auth/sign-in/email": { window: 60, max: 5 },
+      "/api/auth/request-password-reset": { window: 900, max: 3 },
+      "/api/auth/reset-password": { window: 900, max: 5 },
+      "/api/auth/send-verification-email": { window: 300, max: 3 },
+      "/api/auth/two-factor/send-otp": { window: 60, max: 3 },
+      "/api/auth/two-factor/verify-otp": { window: 600, max: 5 },
+    },
+  },
   hooks: {
     before: createAuthMiddleware(async (context) => {
       if (context.path === "/two-factor/disable") {
