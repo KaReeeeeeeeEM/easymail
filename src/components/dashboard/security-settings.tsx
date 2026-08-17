@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { Fingerprint, KeyRound, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
@@ -32,7 +33,7 @@ type Passkey = {
 export function SecuritySettings() {
   const [passwordPending, setPasswordPending] = useState(false);
   const [newPassword, setNewPassword] = useState("");
-  const [passkeyPending, setPasskeyPending] = useState(false);
+  const [passkeyPending, setPasskeyPending] = useState<string | null>(null);
   const [passkeys, setPasskeys] = useState<Passkey[]>([]);
   async function loadPasskeys() {
     const result = await authClient.passkey.listUserPasskeys();
@@ -47,7 +48,7 @@ export function SecuritySettings() {
       return toast.error("Please meet every password requirement.");
     if (newPassword !== String(formData.get("confirmation")))
       return toast.error("Passwords do not match.");
-    setPasswordPending(true);
+    flushSync(() => setPasswordPending(true));
     try {
       const result = await authClient.changePassword({
         currentPassword: String(formData.get("currentPassword")),
@@ -66,7 +67,7 @@ export function SecuritySettings() {
     }
   }
   async function addPasskey(formData: FormData) {
-    setPasskeyPending(true);
+    flushSync(() => setPasskeyPending("setup"));
     try {
       const result = await authClient.passkey.addPasskey({
         name: String(formData.get("passkeyName")) || "Biometric passkey",
@@ -83,19 +84,21 @@ export function SecuritySettings() {
         "Biometric setup was cancelled or is unsupported on this device.",
       );
     } finally {
-      setPasskeyPending(false);
+      setPasskeyPending(null);
     }
   }
   async function removePasskey(id: string) {
-    setPasskeyPending(true);
+    flushSync(() => setPasskeyPending(`remove:${id}`));
     try {
       const result = await authClient.passkey.deletePasskey({ id });
       if (result.error)
         return toast.error(result.error.message ?? "Could not remove passkey.");
       toast.success("Passkey removed.");
       await loadPasskeys();
+    } catch {
+      toast.error("Could not remove the passkey. Please try again.");
     } finally {
-      setPasskeyPending(false);
+      setPasskeyPending(null);
     }
   }
   return (
@@ -156,7 +159,7 @@ export function SecuritySettings() {
                   required
                 />
               </Field>
-              <Button disabled={passwordPending}>
+              <Button type="submit" disabled={passwordPending} aria-busy={passwordPending}>
                 {passwordPending ? <Spinner data-icon="inline-start" /> : <KeyRound data-icon="inline-start" />}
                 {passwordPending ? "Changing password…" : "Change password"}
               </Button>
@@ -191,9 +194,9 @@ export function SecuritySettings() {
                   placeholder="My MacBook Touch ID"
                 />
               </Field>
-              <Button disabled={passkeyPending}>
-                {passkeyPending ? <Spinner data-icon="inline-start" /> : <Fingerprint data-icon="inline-start" />}
-                {passkeyPending ? "Waiting for device…" : "Set up biometrics"}
+              <Button type="submit" disabled={Boolean(passkeyPending)} aria-busy={passkeyPending === "setup"}>
+                {passkeyPending === "setup" ? <Spinner data-icon="inline-start" /> : <Fingerprint data-icon="inline-start" />}
+                {passkeyPending === "setup" ? "Waiting for device…" : "Set up biometrics"}
               </Button>
             </FieldGroup>
           </form>
@@ -216,11 +219,12 @@ export function SecuritySettings() {
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    disabled={passkeyPending}
+                    disabled={Boolean(passkeyPending)}
                     onClick={() => void removePasskey(passkey.id)}
                     aria-label="Remove passkey"
+                    aria-busy={passkeyPending === `remove:${passkey.id}`}
                   >
-                    <Trash2 />
+                    {passkeyPending === `remove:${passkey.id}` ? <Spinner /> : <Trash2 />}
                   </Button>
                 </div>
               </div>

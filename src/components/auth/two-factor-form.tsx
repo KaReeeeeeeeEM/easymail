@@ -25,7 +25,7 @@ export function TwoFactorForm() {
   const router = useRouter();
   const [method, setMethod] = useState<"email" | null>(null);
   const [pending, setPending] = useState(false);
-  const [sending, setSending] = useState(true);
+  const [sending, setSending] = useState(false);
 
   async function sendCode(showToast = false) {
     setSending(true);
@@ -37,15 +37,16 @@ export function TwoFactorForm() {
         result.error.message ??
         "Unable to send a security code. Sign in again.";
       toast.error(message);
-      return;
+      return false;
     }
     if (showToast)
       toast.success("A new security code was sent to your Gmail inbox.");
+    return true;
   }
 
   async function selectEmail() {
-    setMethod("email");
-    await sendCode(false);
+    const sent = await sendCode(false);
+    if (sent) setMethod("email");
   }
 
   async function authenticatePasskey() {
@@ -92,16 +93,16 @@ export function TwoFactorForm() {
         <Button
           type="button"
           onClick={() => void selectEmail()}
-          disabled={pending}
+          disabled={pending || sending}
         >
-          <Mail data-icon="inline-start" />
-          Email security code
+          {sending ? <Spinner data-icon="inline-start" /> : <Mail data-icon="inline-start" />}
+          {sending ? "Sending security code…" : "Email security code"}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => void authenticatePasskey()}
-          disabled={pending}
+          disabled={pending || sending}
         >
           {pending ? (
             <Spinner data-icon="inline-start" />

@@ -61,6 +61,7 @@ export function ApiKeyManager({
   const [keys, setKeys] = useState<KeySummary[]>(initialKeys);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
+  const [copyPending, setCopyPending] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -334,13 +335,23 @@ export function ApiKeyManager({
           </Alert>
           <DialogFooter>
             <Button
-              onClick={() => {
-                if (secret) void navigator.clipboard.writeText(secret);
-                toast.success("Copied");
+              disabled={copyPending}
+              aria-busy={copyPending}
+              onClick={async () => {
+                if (!secret) return;
+                setCopyPending(true);
+                try {
+                  await navigator.clipboard.writeText(secret);
+                  toast.success("Copied");
+                } catch {
+                  toast.error("The API key could not be copied.");
+                } finally {
+                  setCopyPending(false);
+                }
               }}
             >
-              <Copy data-icon="inline-start" />
-              Copy key
+              {copyPending ? <Spinner data-icon="inline-start" /> : <Copy data-icon="inline-start" />}
+              {copyPending ? "Copying key…" : "Copy key"}
             </Button>
           </DialogFooter>
         </DialogContent>
