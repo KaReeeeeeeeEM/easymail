@@ -25,12 +25,17 @@ export function PageRevealObserver() {
       },
       { rootMargin: "0px 0px -10%", threshold: 0.1 },
     );
-    sections.forEach((section) => {
-      const bounds = section.getBoundingClientRect();
-      if (bounds.top < window.innerHeight * 0.92 && bounds.bottom > 0) section.dataset.visible = "true";
-      else observer.observe(section);
+    const frame = window.requestAnimationFrame(() => {
+      sections.forEach((section) => {
+        const bounds = section.getBoundingClientRect();
+        if (bounds.top < window.innerHeight * 0.92 && bounds.bottom > 0) section.dataset.visible = "true";
+        else observer.observe(section);
+      });
     });
-    return () => observer.disconnect();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [pathname]);
   return null;
 }

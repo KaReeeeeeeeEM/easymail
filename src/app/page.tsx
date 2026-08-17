@@ -289,7 +289,7 @@ export default function Home() {
         </Card>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 pb-24 lg:px-8">
+      <section className="mx-auto max-w-7xl px-5 pb-24 lg:px-8" data-reveal>
         <Card className="relative overflow-hidden bg-primary text-primary-foreground">
           <div className="pointer-events-none absolute -end-20 -top-20 size-72 rounded-full bg-primary-foreground/15 blur-3xl" />
           <CardHeader className="relative p-8 lg:p-14">
