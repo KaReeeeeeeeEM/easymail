@@ -1,7 +1,6 @@
-<div align="center">
-  <img src="public/easymail-wordmark.png" alt="EasyMail" width="320" />
-  <p><strong>A reusable, organization-aware SMTP email API for every application you build.</strong></p>
-</div>
+![easymail](./easymail-wordmark.png)
+
+**A reusable, organization-aware SMTP email API for every application you build.**
 
 EasyMail turns Gmail, Google Workspace, Outlook, or any standards-compliant SMTP account into a stable HTTPS email service. Teams configure and verify senders once, issue rotatable API keys, and send transactional email from any application without rebuilding Nodemailer infrastructure.
 
