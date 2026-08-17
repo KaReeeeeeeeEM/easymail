@@ -5,7 +5,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { openAPI, organization, twoFactor } from "better-auth/plugins";
+import { emailOTP, openAPI, organization, twoFactor } from "better-auth/plugins";
 import { randomUUID } from "node:crypto";
 
 import { db } from "@/db";
@@ -88,6 +88,8 @@ export const auth = betterAuth({
       "/api/auth/send-verification-email": { window: 300, max: 3 },
       "/api/auth/two-factor/send-otp": { window: 60, max: 3 },
       "/api/auth/two-factor/verify-otp": { window: 600, max: 5 },
+      "/api/auth/email-otp/send-verification-otp": { window: 60, max: 3 },
+      "/api/auth/email-otp/verify-email": { window: 600, max: 5 },
     },
   },
   hooks: {
@@ -100,6 +102,22 @@ export const auth = betterAuth({
     }),
   },
   plugins: [
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 300,
+      allowedAttempts: 5,
+      storeOTP: "encrypted",
+      resendStrategy: "rotate",
+      sendVerificationOnSignUp: true,
+      overrideDefaultEmailVerification: true,
+      rateLimit: { window: 60, max: 3 },
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        normalizeGmailAddress(email);
+        if (type !== "email-verification") return;
+        const { sendAccountVerificationCodeEmail } = await import("@/features/email/infrastructure/platform-mailer");
+        await sendAccountVerificationCodeEmail({ email, otp });
+      },
+    }),
     twoFactor({
       issuer: "easymail",
       totpOptions: { disable: true },

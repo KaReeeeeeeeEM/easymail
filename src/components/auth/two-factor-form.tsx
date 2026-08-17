@@ -7,8 +7,9 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 export function TwoFactorForm() {
   const router = useRouter();
@@ -53,7 +54,9 @@ export function TwoFactorForm() {
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="security-code">Security code</FieldLabel>
-          <Input id="security-code" name="code" inputMode="numeric" autoComplete="one-time-code" placeholder="000000" pattern="[0-9]{6}" maxLength={6} className="h-12 text-center text-xl tracking-[0.45em]" required autoFocus />
+          <InputOTP id="security-code" name="code" maxLength={6} pattern={REGEXP_ONLY_DIGITS} disabled={pending || sending} autoFocus required containerClassName="justify-center">
+            <InputOTPGroup>{[0, 1, 2, 3, 4, 5].map((index) => <InputOTPSlot key={index} index={index} className="size-11 text-lg" />)}</InputOTPGroup>
+          </InputOTP>
           <FieldDescription>{sending ? "Sending a code to your Gmail inbox…" : "Enter the six-digit code sent to your Gmail inbox. It expires in 5 minutes."}</FieldDescription>
         </Field>
         {error && <Field data-invalid><FieldError>{error}</FieldError></Field>}

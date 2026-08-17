@@ -49,8 +49,8 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     if (result.error)
       return setError(result.error.message ?? "Unable to continue");
     if (isSignUp) {
-      toast.success("Account created. Check your email to verify it before signing in.");
-      router.push("/sign-in");
+      toast.success("Verification code sent. Check your Gmail inbox to finish creating your account.");
+      router.push(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
       return;
     }
     if (result.data && "twoFactorRedirect" in result.data && result.data.twoFactorRedirect) {
