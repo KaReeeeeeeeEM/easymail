@@ -6,7 +6,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const chapters = [
-  ["overview", "Overview"], ["quickstart", "Quickstart"], ["authentication", "Authentication"],
+  ["overview", "Overview"], ["quickstart", "Quickstart"], ["providers", "Provider setup"], ["authentication", "Authentication"],
   ["send-email", "Send email"], ["fields", "Request fields"], ["idempotency", "Idempotency"],
   ["responses", "Responses"], ["errors", "Errors"], ["limits", "Limits"],
   ["rotation", "Key rotation"], ["security", "Security"], ["troubleshooting", "Troubleshooting"],

@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
-import { organization } from "./auth-schema";
+import { organization, user } from "./auth-schema";
 
 export const deliveryStatus = pgEnum("delivery_status", ["pending", "sent", "failed"]);
 
@@ -58,3 +58,25 @@ export const auditLog = pgTable("audit_log", {
   metadata: jsonb("metadata").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [index("audit_log_created_idx").on(table.createdAt), index("audit_log_actor_idx").on(table.actorId)]);
+
+export const generatedReport = pgTable("generated_report", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  status: text("status").default("ready").notNull(),
+  format: text("format").default("csv").notNull(),
+  rowCount: integer("row_count").default(0).notNull(),
+  generatedBy: text("generated_by").notNull().references(() => user.id, { onDelete: "restrict" }),
+  generatedByEmail: text("generated_by_email").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [index("generated_report_created_idx").on(table.createdAt)]);
+
+export const onboardingPageVisit = pgTable("onboarding_page_visit", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  pageKey: text("page_key").notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("onboarding_page_user_uq").on(table.userId, table.pageKey),
+  index("onboarding_page_user_idx").on(table.userId),
+]);

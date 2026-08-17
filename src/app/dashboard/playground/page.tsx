@@ -16,10 +16,10 @@ const endpoint = "https://easymail.almareem.com/api/v1/emails";
 const samples = {
   curl: `# Convert a file first: base64 < invoice.pdf | tr -d '\\n'
 curl --request POST '${endpoint}' \\
-  --header 'Authorization: Bearer YOUR_API_KEY' \\
+  --header "Authorization: Bearer $EASYMAIL_API_KEY" \\
   --header 'Content-Type: application/json' \\
   --header 'Idempotency-Key: unique-request-id' \\
-  --data '{"to":"recipient@example.com","cc":["finance@example.com"],"subject":"Hello","text":"Plain-text fallback","html":"<h1>Hello!</h1><p>Sent with HTML.</p>","attachments":[{"filename":"invoice.pdf","content":"BASE64_FILE_CONTENT","contentType":"application/pdf"}]}'`,
+  --data '{"to":"customer@gmail.com","cc":["finance@gmail.com"],"subject":"Hello","text":"Plain-text fallback","html":"<h1>Hello!</h1><p>Sent with HTML.</p>","attachments":[{"filename":"invoice.pdf","content":"BASE64_FILE_CONTENT","contentType":"application/pdf"}]}'`,
   javascript: `import { readFile } from "node:fs/promises";
 
 const fileBuffer = await readFile("invoice.pdf");
@@ -31,8 +31,8 @@ const response = await fetch("${endpoint}", {
     "Idempotency-Key": crypto.randomUUID(),
   },
   body: JSON.stringify({
-    to: "recipient@example.com",
-    cc: ["finance@example.com"],
+    to: "customer@gmail.com",
+    cc: ["finance@gmail.com"],
     subject: "Hello",
     text: "Plain-text fallback",
     html: "<h1>Hello!</h1><p>Sent with HTML.</p>",
@@ -50,8 +50,8 @@ response = requests.post(
     "${endpoint}",
     headers={"Authorization": f"Bearer {os.environ['EASYMAIL_API_KEY']}", "Idempotency-Key": str(uuid.uuid4())},
     json={
-        "to": "recipient@example.com",
-        "cc": ["finance@example.com"],
+        "to": "customer@gmail.com",
+        "cc": ["finance@gmail.com"],
         "subject": "Hello",
         "text": "Plain-text fallback",
         "html": "<h1>Hello!</h1><p>Sent with HTML.</p>",

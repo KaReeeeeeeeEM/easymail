@@ -19,6 +19,8 @@
     "@better-auth/api-key": "^1.6.29",
     "@better-auth/drizzle-adapter": "^1.6.29",
     "@better-auth/passkey": "^1.6.29",
+    "@onboardjs/core": "^1.0.0-rc.4",
+    "@onboardjs/react": "^1.0.0-rc.5",
     "better-auth": "^1.6.29",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

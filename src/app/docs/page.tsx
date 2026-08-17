@@ -31,13 +31,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const examples = {
-  curl: `curl https://your-domain.com/api/v1/emails \\
+  curl: `curl https://easymail.almareem.com/api/v1/emails \\
   -H "Authorization: Bearer $EASYMAIL_API_KEY" \\
   -H "Content-Type: application/json" \\
   -H "Idempotency-Key: receipt-order-9382" \\
   -d '{
-    "to": "customer@example.com",
-    "cc": ["finance@example.com"],
+    "to": "customer@gmail.com",
+    "cc": ["finance@gmail.com"],
     "subject": "Your receipt",
     "text": "Thanks for your order.",
     "html": "<h1>Your receipt</h1><p>Thanks for your order.</p>",
@@ -46,7 +46,7 @@ const examples = {
   javascript: `import { readFile } from "node:fs/promises";
 
 const receiptBuffer = await readFile("receipt.pdf");
-const response = await fetch("https://your-domain.com/api/v1/emails", {
+const response = await fetch("https://easymail.almareem.com/api/v1/emails", {
   method: "POST",
   headers: {
     Authorization: \`Bearer \${process.env.EASYMAIL_API_KEY}\`,
@@ -54,8 +54,8 @@ const response = await fetch("https://your-domain.com/api/v1/emails", {
     "Idempotency-Key": "receipt-order-9382",
   },
   body: JSON.stringify({
-    to: "customer@example.com",
-    cc: ["finance@example.com"],
+    to: "customer@gmail.com",
+    cc: ["finance@gmail.com"],
     subject: "Your receipt",
     text: "Thanks for your order.",
     html: "<h1>Your receipt</h1><p>Thanks for your order.</p>",
@@ -73,14 +73,14 @@ with open("receipt.pdf", "rb") as file:
     receipt_base64 = base64.b64encode(file.read()).decode()
 
 response = requests.post(
-    "https://your-domain.com/api/v1/emails",
+    "https://easymail.almareem.com/api/v1/emails",
     headers={
         "Authorization": f"Bearer {os.environ['EASYMAIL_API_KEY']}",
         "Idempotency-Key": "receipt-order-9382",
     },
     json={
-        "to": "customer@example.com",
-        "cc": ["finance@example.com"],
+        "to": "customer@gmail.com",
+        "cc": ["finance@gmail.com"],
         "subject": "Your receipt",
         "text": "Thanks for your order.",
         "html": "<h1>Your receipt</h1><p>Thanks for your order.</p>",
@@ -169,7 +169,7 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
               operational safety.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <SummaryCard label="Base URL" value="https://your-domain.com" />
+              <SummaryCard label="Base URL" value="https://easymail.almareem.com" />
               <SummaryCard label="Endpoint" value="POST /api/v1/emails" />
               <SummaryCard label="Authentication" value="Bearer API key" />
             </div>
@@ -223,6 +223,20 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
             </Alert>
           </section>
           <DocSeparator />
+          <section id="providers" data-reveal>
+            <SectionHeading
+              kicker="Sender setup"
+              title="Create provider credentials"
+              description="The platform sends through the sender you select. Use a provider-issued app password or SMTP credential—never your normal mailbox password."
+            />
+            <div className="mt-7 grid gap-4">
+              <ProviderGuide title="Gmail and Google Workspace" steps="Open Google Account → Security and enable 2-Step Verification. Open App passwords, create one named Easymail, and copy the 16-character password. In SMTP senders choose Gmail, use smtp.gmail.com, port 465, SSL/TLS, and your complete Gmail address as both sender and username. Paste the app password without spaces and verify the connection." href="https://support.google.com/accounts/answer/185833" linkLabel="Google’s official app-password guide" />
+              <ProviderGuide title="Microsoft Outlook and Microsoft 365" steps="Enable two-step verification in Microsoft Security. From Advanced security options create an app password; work or school accounts may require an administrator to enable this method. Choose Outlook, use smtp.office365.com, port 587, STARTTLS, and the complete mailbox address as username. Paste the app password and verify." href="https://support.microsoft.com/en-US/accounts-billing/manage/how-to-get-and-use-app-passwords" linkLabel="Microsoft’s official app-password guide" />
+              <ProviderGuide title="Yahoo Mail" steps="Open Yahoo Account Security. Under External connections choose Create app password and name it Easymail. Choose Custom SMTP, use smtp.mail.yahoo.com, port 465, SSL/TLS, and the complete Yahoo address as username. Paste the generated password and verify." href="https://help.yahoo.com/kb/mail/generate-password-sln15241.html" linkLabel="Yahoo’s official app-password guide" />
+              <ProviderGuide title="Other SMTP providers" steps="Ask the provider for its outbound SMTP host, authenticated username, app-specific password, port, and encryption mode. Use port 465 with SSL/TLS or port 587 with STARTTLS. The From address must be authorized by that provider. Add the values under Custom SMTP and use Verify before saving." />
+            </div>
+          </section>
+          <DocSeparator />
           <section id="authentication" data-reveal>
             <SectionHeading
               kicker="Identity"
@@ -230,7 +244,7 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
               description="Every email request requires an organization-owned API key associated with one SMTP sender. Dashboard session cookies are never accepted by the public email endpoint."
             />
             <SyntaxCodeBlock
-              code={`Authorization: Bearer gms_your_secret_key`}
+              code={`Authorization: Bearer $EASYMAIL_API_KEY`}
               language="text"
             />
             <p className="mt-5 leading-7 text-muted-foreground">
@@ -368,7 +382,7 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
     "id": "44df90ce-...",
     "status": "sent",
     "messageId": "<provider-message-id@gmail.com>",
-    "accepted": ["customer@example.com"],
+    "accepted": ["customer@gmail.com"],
     "rejected": [],
     "duplicate": false
   },
@@ -391,7 +405,7 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
             </p>
             <SyntaxCodeBlock
               language="bash"
-              code={`curl https://your-domain.com/api/v1/emails/44df90ce-... \\
+              code={`curl https://easymail.almareem.com/api/v1/emails/44df90ce-... \\
   -H "Authorization: Bearer $EASYMAIL_API_KEY"`}
             />
           </section>
@@ -575,6 +589,9 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
       </CardHeader>
     </Card>
   );
+}
+function ProviderGuide({ title, steps, href, linkLabel }: { title: string; steps: string; href?: string; linkLabel?: string }) {
+  return <Card><CardHeader><CardTitle>{title}</CardTitle><CardDescription className="leading-7">{steps}</CardDescription></CardHeader>{href && <CardContent><a className="text-sm font-medium text-primary underline underline-offset-4" href={href} target="_blank" rel="noreferrer">{linkLabel} ↗</a></CardContent>}</Card>;
 }
 function SectionHeading({
   kicker,

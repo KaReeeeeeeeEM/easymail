@@ -83,11 +83,11 @@ export function PlaygroundForm({ senders }: { senders: Sender[] }) {
         </Field>
         <Field>
           <FieldLabel htmlFor="playground-to">Recipient</FieldLabel>
-          <Input id="playground-to" name="to" type="email" placeholder="recipient@example.com" required />
+          <Input id="playground-to" name="to" type="email" placeholder="customer@gmail.com" required />
         </Field>
         <Field>
           <FieldLabel htmlFor="playground-cc">CC</FieldLabel>
-          <Input id="playground-cc" name="cc" type="text" placeholder="finance@example.com, owner@example.com" />
+          <Input id="playground-cc" name="cc" type="text" placeholder="finance@gmail.com, owner@gmail.com" />
           <FieldDescription>Optional. Separate multiple addresses with commas.</FieldDescription>
         </Field>
         <Field>

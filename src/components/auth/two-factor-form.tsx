@@ -59,8 +59,8 @@ export function TwoFactorForm() {
         );
       toast.success("Biometric identity confirmed. Welcome back.");
       const session = await authClient.getSession();
-      const role = (session.data?.user as { role?: string } | undefined)?.role;
-      router.replace(role === "SUPER_ADMIN" ? "/superadmin" : "/dashboard");
+      const currentUser = session.data?.user as { role?: string; mustChangePassword?: boolean } | undefined;
+      router.replace(currentUser?.mustChangePassword ? "/change-temporary-password" : currentUser?.role === "SUPER_ADMIN" ? "/superadmin" : "/dashboard");
       router.refresh();
     } catch {
       toast.error("Biometric verification was cancelled or unavailable.");
@@ -83,8 +83,8 @@ export function TwoFactorForm() {
     }
     toast.success("Identity confirmed. Welcome back.");
     const session = await authClient.getSession();
-    const role = (session.data?.user as { role?: string } | undefined)?.role;
-    router.replace(role === "SUPER_ADMIN" ? "/superadmin" : "/dashboard");
+    const currentUser = session.data?.user as { role?: string; mustChangePassword?: boolean } | undefined;
+    router.replace(currentUser?.mustChangePassword ? "/change-temporary-password" : currentUser?.role === "SUPER_ADMIN" ? "/superadmin" : "/dashboard");
     router.refresh();
   }
 

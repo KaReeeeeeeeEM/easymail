@@ -6,7 +6,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { emailOTP, openAPI, organization, twoFactor } from "better-auth/plugins";
+import { admin, emailOTP, openAPI, organization, twoFactor } from "better-auth/plugins";
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 
@@ -14,6 +14,7 @@ import { db } from "@/db";
 import * as authSchema from "@/db/auth-schema";
 import { smtpConfiguration } from "@/db/schema";
 import { normalizeGmailAddress as validateGmailAddress } from "@/lib/gmail-address";
+import { adminAccess, adminRoles } from "@/lib/admin-access";
 
 function normalizeGmailAddress(email: string) {
   try {
@@ -31,6 +32,7 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       role: { type: "string", required: false, defaultValue: "USER", input: false },
+      mustChangePassword: { type: "boolean", required: false, defaultValue: false, input: false },
     },
   },
   databaseHooks: {
@@ -109,6 +111,11 @@ export const auth = betterAuth({
     }),
     after: createAuthMiddleware(async (context) => {
       const session = context.context.session;
+      if (context.path === "/admin/impersonate-user" && session?.user) {
+        const targetUserId = (context.body as { userId?: string } | undefined)?.userId;
+        const { recordAuditLog } = await import("@/lib/audit");
+        await recordAuditLog({ action: "USER_IMPERSONATION_STARTED", entity: "user", entityId: targetUserId, description: "Super administrator entered a user session for delegated support.", actorId: session.user.id, actorEmail: session.user.email, metadata: { targetUserId } });
+      }
       if (context.path === "/two-factor/verify-otp" && session?.user) {
         const { recordAuditLog } = await import("@/lib/audit");
         await recordAuditLog({ action: "AUTH_LOGIN", entity: "session", description: "User completed email two-factor authentication.", actorId: session.user.id, actorEmail: session.user.email });
@@ -132,6 +139,12 @@ export const auth = betterAuth({
     }),
   },
   plugins: [
+    admin({
+      ac: adminAccess,
+      roles: adminRoles,
+      defaultRole: "USER",
+      impersonationSessionDuration: 60 * 30,
+    }),
     passkey({
       rpName: "easymail",
       authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "preferred", userVerification: "required" },

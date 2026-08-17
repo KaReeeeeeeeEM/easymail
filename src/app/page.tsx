@@ -355,7 +355,7 @@ function ApiPreview() {
               </p>
             </div>
           </div>
-          <SyntaxCodeBlock className="mt-0 [&_.shiki]:text-xs! [&_.shiki]:leading-6!" language="json" code={`{\n  "to": "customer@example.com",\n  "subject": "Your receipt is ready",\n  "text": "Thanks for your order."\n}`} />
+          <SyntaxCodeBlock className="mt-0 [&_.shiki]:text-xs! [&_.shiki]:leading-6!" language="json" code={`{\n  "to": "customer@gmail.com",\n  "subject": "Your receipt is ready",\n  "text": "Thanks for your order."\n}`} />
           <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
             <div>
               <p className="text-sm font-semibold">Delivered through Gmail</p>
