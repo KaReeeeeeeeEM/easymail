@@ -58,7 +58,9 @@ export function TwoFactorForm() {
           result.error.message ?? "Biometric verification failed.",
         );
       toast.success("Biometric identity confirmed. Welcome back.");
-      router.replace("/dashboard");
+      const session = await authClient.getSession();
+      const role = (session.data?.user as { role?: string } | undefined)?.role;
+      router.replace(role === "SUPER_ADMIN" ? "/superadmin" : "/dashboard");
       router.refresh();
     } catch {
       toast.error("Biometric verification was cancelled or unavailable.");
@@ -80,7 +82,9 @@ export function TwoFactorForm() {
       return;
     }
     toast.success("Identity confirmed. Welcome back.");
-    router.replace("/dashboard");
+    const session = await authClient.getSession();
+    const role = (session.data?.user as { role?: string } | undefined)?.role;
+    router.replace(role === "SUPER_ADMIN" ? "/superadmin" : "/dashboard");
     router.refresh();
   }
 

@@ -46,3 +46,15 @@ export const emailDelivery = pgTable("email_delivery", {
     .where(sql`${table.idempotencyKey} is not null`),
   index("email_delivery_org_created_idx").on(table.organizationId, table.createdAt),
 ]);
+
+export const auditLog = pgTable("audit_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  action: text("action").notNull(),
+  entity: text("entity").notNull(),
+  entityId: text("entity_id"),
+  description: text("description").notNull(),
+  actorId: text("actor_id"),
+  actorEmail: text("actor_email").notNull(),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [index("audit_log_created_idx").on(table.createdAt), index("audit_log_actor_idx").on(table.actorId)]);

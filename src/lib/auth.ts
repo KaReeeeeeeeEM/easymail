@@ -28,6 +28,11 @@ function normalizeGmailAddress(email: string) {
 export const auth = betterAuth({
   appName: "easymail",
   database: drizzleAdapter(db, { provider: "pg", schema: authSchema }),
+  user: {
+    additionalFields: {
+      role: { type: "string", required: false, defaultValue: "USER", input: false },
+    },
+  },
   databaseHooks: {
     user: {
       create: {
@@ -104,8 +109,12 @@ export const auth = betterAuth({
       }
     }),
     after: createAuthMiddleware(async (context) => {
-      if (context.path !== "/api-key/create") return;
       const session = context.context.session;
+      if (context.path === "/two-factor/verify-otp" && session?.user) {
+        const { recordAuditLog } = await import("@/lib/audit");
+        await recordAuditLog({ action: "AUTH_LOGIN", entity: "session", description: "User completed email two-factor authentication.", actorId: session.user.id, actorEmail: session.user.email });
+      }
+      if (context.path !== "/api-key/create") return;
       const body = context.body as { name?: string; organizationId?: string; metadata?: { senderId?: string } } | undefined;
       const organizationId = body?.organizationId;
       const senderId = body?.metadata?.senderId;
@@ -116,6 +125,8 @@ export const auth = betterAuth({
         if (!workspace || !sender) return;
         const { sendApiKeyCreatedEmail } = await import("@/features/email/infrastructure/platform-mailer");
         await sendApiKeyCreatedEmail({ email: session.user.email, name: session.user.name, keyName: body.name ?? "Unnamed key", workspaceName: workspace.name, senderLabel: sender.label });
+        const { recordAuditLog } = await import("@/lib/audit");
+        await recordAuditLog({ action: "API_KEY_CREATED", entity: "api_key", description: `Created API key ${body.name ?? "Unnamed key"} for ${workspace.name}.`, actorId: session.user.id, actorEmail: session.user.email, metadata: { organizationId, senderId } });
       } catch (error) {
         console.error("Failed to send API key creation notification", error);
       }

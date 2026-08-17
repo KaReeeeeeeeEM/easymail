@@ -16,6 +16,7 @@ export default async function DashboardLayout({
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/sign-in");
+  if (session.user.role === "SUPER_ADMIN") redirect("/superadmin");
   const organizations = await auth.api.listOrganizations({
     headers: await headers(),
   });
