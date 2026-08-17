@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { Eye, FileUp, Send } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -32,8 +33,10 @@ export function PlaygroundForm({ senders }: { senders: Sender[] }) {
   const preview = useMemo(() => html || "<p>No HTML preview yet.</p>", [html]);
 
   async function submit(form: HTMLFormElement) {
-    setPending(true);
-    setResult(null);
+    flushSync(() => {
+      setPending(true);
+      setResult(null);
+    });
     try {
       const formData = new FormData(form);
       const attachments = await encodeFiles(form.querySelector<HTMLInputElement>("#playground-attachments")?.files ?? null);
@@ -117,8 +120,8 @@ export function PlaygroundForm({ senders }: { senders: Sender[] }) {
           <Input id="playground-attachments" name="attachments" type="file" multiple />
           <FieldDescription>Optional. Up to 3 files; the complete request must remain below 4.5 MB.</FieldDescription>
         </Field>
-        <Button disabled={pending}>
-          {pending ? <Spinner data-icon="inline-start" /> : <Send data-icon="inline-start" />}
+        <Button type="submit" disabled={pending} aria-busy={pending}>
+          {pending ? <Spinner data-icon="inline-start" className="text-primary-foreground" /> : <Send data-icon="inline-start" />}
           {pending ? "Sending email…" : "Send test email"}
         </Button>
         {result && <div className="rounded-xl border bg-muted/40 p-4"><p className="mb-2 flex items-center gap-2 text-sm font-medium"><FileUp />API response</p><pre className="overflow-x-auto whitespace-pre-wrap text-xs">{result}</pre></div>}
