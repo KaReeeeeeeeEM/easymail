@@ -15,7 +15,8 @@ EasyMail turns Gmail, Google Workspace, Outlook, or any standards-compliant SMTP
 - Idempotent email requests for safe retries
 - Accepted and rejected recipient tracking
 - Organization-scoped delivery-status lookups
-- Email verification and secure password-recovery flows
+- Gmail-only registration, email verification, and secure password-recovery flows
+- Mandatory six-digit email OTP on every password sign-in
 - Dark mode, responsive dashboard, charts, activity history, and detailed API documentation
 - OpenAPI output at `/api/openapi`
 
@@ -141,12 +142,13 @@ See `/docs` for JavaScript, Python, cURL, error, rotation, and security examples
 
 ## Authentication lifecycle
 
-1. A user registers with a confirmed password.
+1. A user registers with a confirmed password and an address ending in `@gmail.com`.
 2. EasyMail sends a verification link through the platform mail transport.
-3. Verified users sign in and create a personal or organization workspace.
-4. Workspace administrators add verified SMTP senders.
-5. Applications receive separately rotatable API keys.
-6. Forgotten-password links expire after 15 minutes, are single-use, and revoke existing sessions after reset.
+3. After password validation, EasyMail sends a six-digit, single-use OTP to that Gmail inbox.
+4. The OTP must be completed on every sign-in; trusted-device bypass and 2FA disabling are unavailable.
+5. Verified users create a personal or organization workspace.
+6. Workspace administrators add verified SMTP senders and issue separately rotatable API keys.
+7. Forgotten-password links expire after 15 minutes, are single-use, and revoke existing sessions after reset.
 
 ## Security model
 
@@ -157,6 +159,8 @@ See `/docs` for JavaScript, Python, cURL, error, rotation, and security examples
 - Payload sizes, recipient counts, timeouts, and API-key rates are bounded.
 - Idempotency keys protect retrying applications from duplicate sends.
 - Password-reset responses do not disclose whether an account exists.
+- Server-side lifecycle hooks reject non-Gmail registrations and email changes.
+- Email OTP values are encrypted at rest, expire after five minutes, allow five attempts, and trigger a 15-minute account lockout after repeated failures.
 - Secrets and `.env*` files are excluded from source control.
 
 ## Database changes

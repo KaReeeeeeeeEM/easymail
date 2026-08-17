@@ -15,6 +15,13 @@
       "when": 1786974500435,
       "tag": "0001_dry_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786976593077,
+      "tag": "0002_windy_cassandra_nova",
+      "breakpoints": true
     }
   ]
 }

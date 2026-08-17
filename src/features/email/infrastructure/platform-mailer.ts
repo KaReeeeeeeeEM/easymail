@@ -44,3 +44,14 @@ export async function sendVerificationEmail({ email, name, url }: { email: strin
 export async function sendPasswordResetEmail({ email, name, url }: { email: string; name: string; url: string }) {
   await sendAccountEmail({ to: email, name, subject: "Reset your password", message: "Use this secure, single-use link to choose a new password. It expires in 15 minutes.", actionLabel: "Reset password", actionUrl: url });
 }
+
+export async function sendTwoFactorCodeEmail({ email, name, otp }: { email: string; name: string; otp: string }) {
+  const { from, transporter: mailer } = mailTransport();
+  await mailer.sendMail({
+    from,
+    to: email,
+    subject: `${otp} is your easymail security code`,
+    text: `Hello ${name},\n\nYour easymail sign-in code is ${otp}. It expires in 5 minutes.\n\nIf you did not try to sign in, change your password immediately.`,
+    html: `<!doctype html><html lang="en"><body style="margin:0;background:#f5f5f4;font-family:Arial,sans-serif;color:#171717"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 14px"><tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;border:1px solid #e7e5e4;border-radius:20px;background:#fff;overflow:hidden"><tr><td style="padding:24px 32px;background:#111;color:#ff9100;font-size:27px;font-style:italic;font-weight:700">easymail</td></tr><tr><td style="padding:38px 32px;color:#57534e;font-size:16px;line-height:1.7"><h1 style="margin:0 0 20px;color:#171717;font-size:28px">Confirm your sign-in</h1><p>Hello ${escapeHtml(name)},</p><p>Enter this security code to finish signing in:</p><p style="margin:28px 0;font-size:36px;font-weight:800;letter-spacing:10px;color:#171717">${escapeHtml(otp)}</p><p>This code expires in 5 minutes and can only be used once.</p><p style="font-size:13px">If you did not try to sign in, change your password immediately.</p></td></tr></table></td></tr></table></body></html>`,
+  });
+}

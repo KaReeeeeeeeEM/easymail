@@ -34,6 +34,11 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       setError("Passwords do not match");
       return;
     }
+    if (!/^[^\s@]+@gmail\.com$/i.test(email.trim())) {
+      setPending(false);
+      setError("Use a valid Gmail address ending in @gmail.com.");
+      return;
+    }
     const result = isSignUp
       ? await authClient.signUp.email({
           email,
@@ -47,6 +52,10 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     if (isSignUp) {
       toast.success("Account created. Check your email to verify it before signing in.");
       router.push("/sign-in");
+      return;
+    }
+    if (result.data && "twoFactorRedirect" in result.data && result.data.twoFactorRedirect) {
+      router.push("/two-factor");
       return;
     }
     router.push("/dashboard");
@@ -75,10 +84,13 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             name="email"
             type="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder="you@gmail.com"
+            pattern="[^\\s@]+@gmail\\.com"
+            title="Use a Gmail address ending in @gmail.com"
             required
           />
         </Field>
+        {isSignUp && <FieldDescription>Only Gmail addresses ending in @gmail.com can register.</FieldDescription>}
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
           <PasswordInput
