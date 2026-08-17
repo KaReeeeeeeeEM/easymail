@@ -76,7 +76,12 @@ response.raise_for_status()`,
 };
 
 const requestFields = [
-  ["senderId", "UUID", "Optional", "Confirm the sender assigned to the API key. The key's sender is always used when omitted."],
+  [
+    "senderId",
+    "UUID",
+    "Optional",
+    "Confirm the sender assigned to the API key. The key's sender is always used when omitted.",
+  ],
   [
     "to",
     "string | string[]",
@@ -109,11 +114,7 @@ const errors = [
   ["400", "INVALID_JSON", "The request body is not valid JSON."],
   ["401", "API_KEY_REQUIRED", "No API key was supplied."],
   ["401", "INVALID_API_KEY", "The key is invalid, revoked, or expired."],
-  [
-    "409",
-    "SMTP_NOT_CONFIGURED",
-    "The workspace has no matching SMTP sender.",
-  ],
+  ["409", "SMTP_NOT_CONFIGURED", "The workspace has no matching SMTP sender."],
   ["413", "PAYLOAD_TOO_LARGE", "The request exceeds 256 KB."],
   ["415", "UNSUPPORTED_MEDIA_TYPE", "Content-Type is not application/json."],
   ["422", "VALIDATION_ERROR", "One or more request fields are invalid."],
@@ -121,10 +122,20 @@ const errors = [
 ];
 
 export default function DocsPage() {
+  return <DocsContent />;
+}
+
+export function DocsContent({ embedded = false }: { embedded?: boolean }) {
   return (
     <main className="min-h-screen bg-background">
-      <PublicHeader />
-      <div className="mx-auto grid max-w-7xl gap-12 px-5 py-12 lg:grid-cols-[230px_minmax(0,1fr)] lg:px-8">
+      {!embedded && <PublicHeader />}
+      <div
+        className={
+          embedded
+            ? "grid gap-10 px-5 py-8 lg:grid-cols-[210px_minmax(0,1fr)] lg:px-8"
+            : "mx-auto grid max-w-7xl gap-12 px-5 py-12 lg:grid-cols-[230px_minmax(0,1fr)] lg:px-8"
+        }
+      >
         <aside className="hidden lg:block">
           <DocsNavigation />
         </aside>
@@ -136,9 +147,9 @@ export default function DocsPage() {
             </h1>
             <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
               Connect one or more SMTP senders, then send transactional email
-              from any application through a stable HTTPS contract. This guide covers
-              setup, authentication, requests, errors, rotation, and operational
-              safety.
+              from any application through a stable HTTPS contract. This guide
+              covers setup, authentication, requests, errors, rotation, and
+              operational safety.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               <SummaryCard label="Base URL" value="https://your-domain.com" />
@@ -201,7 +212,10 @@ export default function DocsPage() {
               title="Authentication"
               description="Every email request requires an organization-owned API key associated with one SMTP sender. Dashboard session cookies are never accepted by the public email endpoint."
             />
-            <SyntaxCodeBlock code={`Authorization: Bearer gms_your_secret_key`} language="text" />
+            <SyntaxCodeBlock
+              code={`Authorization: Bearer gms_your_secret_key`}
+              language="text"
+            />
             <p className="mt-5 leading-7 text-muted-foreground">
               You may alternatively send the same secret in the{" "}
               <code className="rounded bg-muted px-1.5 py-0.5">x-api-key</code>{" "}
@@ -232,7 +246,14 @@ export default function DocsPage() {
               </TabsList>
               {Object.entries(examples).map(([language, code]) => (
                 <TabsContent value={language} key={language}>
-                  <SyntaxCodeBlock code={code} language={language === "curl" ? "bash" : language as "javascript" | "python"} />
+                  <SyntaxCodeBlock
+                    code={code}
+                    language={
+                      language === "curl"
+                        ? "bash"
+                        : (language as "javascript" | "python")
+                    }
+                  />
                 </TabsContent>
               ))}
             </Tabs>
@@ -291,7 +312,10 @@ export default function DocsPage() {
               title="Idempotency"
               description="Use a stable Idempotency-Key whenever your application might retry a send after a timeout or temporary network failure."
             />
-            <SyntaxCodeBlock code={`Idempotency-Key: order-9382-receipt`} language="text" />
+            <SyntaxCodeBlock
+              code={`Idempotency-Key: order-9382-receipt`}
+              language="text"
+            />
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <Card>
                 <CardHeader>
@@ -320,7 +344,9 @@ export default function DocsPage() {
               title="Success responses"
               description="Responses include the delivery record and a request ID for tracing."
             />
-            <SyntaxCodeBlock language="json" code={`{
+            <SyntaxCodeBlock
+              language="json"
+              code={`{
   "data": {
     "id": "44df90ce-...",
     "status": "sent",
@@ -330,7 +356,8 @@ export default function DocsPage() {
     "duplicate": false
   },
   "requestId": "12d4139c-..."
-}`} />
+}`}
+            />
             <p className="mt-5 leading-7 text-muted-foreground">
               The same request ID is also returned in the{" "}
               <code className="rounded bg-muted px-1.5 py-0.5">
@@ -339,9 +366,17 @@ export default function DocsPage() {
               response header.
             </p>
             <h3 className="mt-8 text-lg font-semibold">Check request status</h3>
-            <p className="mt-2 leading-7 text-muted-foreground">Call <code>GET /api/v1/emails/{"{id}"}</code> with the same API-key header. A status of <code>accepted</code> means the SMTP provider accepted at least one recipient; it does not guarantee inbox placement or that the recipient opened the message.</p>
-            <SyntaxCodeBlock language="bash" code={`curl https://your-domain.com/api/v1/emails/44df90ce-... \\
-  -H "Authorization: Bearer $EASYMAIL_API_KEY"`} />
+            <p className="mt-2 leading-7 text-muted-foreground">
+              Call <code>GET /api/v1/emails/{"{id}"}</code> with the same
+              API-key header. A status of <code>accepted</code> means the SMTP
+              provider accepted at least one recipient; it does not guarantee
+              inbox placement or that the recipient opened the message.
+            </p>
+            <SyntaxCodeBlock
+              language="bash"
+              code={`curl https://your-domain.com/api/v1/emails/44df90ce-... \\
+  -H "Authorization: Bearer $EASYMAIL_API_KEY"`}
+            />
           </section>
           <DocSeparator />
           <section id="errors" data-reveal>
@@ -376,13 +411,16 @@ export default function DocsPage() {
                 </Table>
               </CardContent>
             </Card>
-            <SyntaxCodeBlock language="json" code={`{
+            <SyntaxCodeBlock
+              language="json"
+              code={`{
   "error": {
     "code": "INVALID_API_KEY",
     "message": "The API key is invalid or expired",
     "requestId": "12d4139c-..."
   }
-}`} />
+}`}
+            />
           </section>
           <DocSeparator />
           <section id="limits" data-reveal>
@@ -506,7 +544,7 @@ export default function DocsPage() {
           </section>
         </article>
       </div>
-      <PublicFooter />
+      {!embedded && <PublicFooter />}
     </main>
   );
 }
