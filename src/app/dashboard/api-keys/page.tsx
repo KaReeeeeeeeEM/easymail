@@ -1,6 +1,9 @@
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
+import { db } from "@/db";
+import { smtpConfiguration } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { ApiKeyManager } from "@/components/dashboard/api-key-manager";
 import { PageHeading } from "@/components/dashboard/page-heading";
 import { Button } from "@/components/ui/button";
@@ -25,6 +28,9 @@ export default async function ApiKeysPage() {
         query: { organizationId },
       })
     : null;
+  const senders = organizationId
+    ? await db.select({ id: smtpConfiguration.id, label: smtpConfiguration.label, senderEmail: smtpConfiguration.senderEmail }).from(smtpConfiguration).where(eq(smtpConfiguration.organizationId, organizationId))
+    : [];
   return (
     <div className="flex flex-col gap-8">
       {organizationId ? (
@@ -35,6 +41,7 @@ export default async function ApiKeysPage() {
               typeof ApiKeyManager
             >[0]["initialKeys"]
           }
+          senders={senders}
         />
       ) : (
         <>

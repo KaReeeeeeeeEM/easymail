@@ -149,6 +149,7 @@ export const auth = betterAuth({
       references: "organization",
       defaultPrefix: "gms_",
       requireName: true,
+      enableMetadata: true,
       rateLimit: { enabled: true, timeWindow: 60_000, maxRequests: 60 },
     }),
     openAPI(),

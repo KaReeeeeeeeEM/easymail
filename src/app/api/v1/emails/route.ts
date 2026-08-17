@@ -23,18 +23,21 @@ export async function POST(request: Request) {
 
   const verification = await auth.api.verifyApiKey({ body: { key } });
   if (!verification.valid || !verification.key) return errorResponse(401, "INVALID_API_KEY", "The API key is invalid or expired", requestId);
+  const senderId = typeof verification.key.metadata?.senderId === "string" ? verification.key.metadata.senderId : null;
+  if (!senderId) return errorResponse(409, "API_KEY_SENDER_REQUIRED", "This API key is not associated with an SMTP sender. Create or rotate the key.", requestId);
 
   let body: unknown;
   try { body = await request.json(); }
   catch { return errorResponse(400, "INVALID_JSON", "Request body must be valid JSON", requestId); }
   const parsed = sendEmailSchema.safeParse(body);
   if (!parsed.success) return errorResponse(422, "VALIDATION_ERROR", "Check the request fields", requestId, parsed.error.flatten());
+  if (parsed.data.senderId && parsed.data.senderId !== senderId) return errorResponse(403, "SENDER_NOT_ALLOWED", "This API key cannot send through the requested SMTP sender", requestId);
 
   const idempotencyKey = request.headers.get("idempotency-key")?.trim();
   if (idempotencyKey && idempotencyKey.length > 200) return errorResponse(422, "INVALID_IDEMPOTENCY_KEY", "Idempotency-Key must not exceed 200 characters", requestId);
 
   try {
-    const result = await sendOrganizationEmail(parsed.data, { organizationId: verification.key.referenceId, idempotencyKey });
+    const result = await sendOrganizationEmail({ ...parsed.data, senderId }, { organizationId: verification.key.referenceId, idempotencyKey });
     return Response.json({ data: result, requestId }, { status: result.duplicate ? 200 : 201, headers: { "x-request-id": requestId } });
   } catch (error) {
     if (error instanceof EmailServiceError) {

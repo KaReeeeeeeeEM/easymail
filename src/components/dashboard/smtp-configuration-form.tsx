@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export function SmtpConfigurationForm({ label = "Add sender", variant = "default" }: { label?: string; variant?: "default" | "outline" }) {
+export function SmtpConfigurationForm({ label = "Add sender", variant = "default", disabled = false }: { label?: string; variant?: "default" | "outline"; disabled?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -29,7 +29,7 @@ export function SmtpConfigurationForm({ label = "Add sender", variant = "default
     finally { setPending(false); }
   }
   return <Dialog open={open} onOpenChange={(next) => { if (!pending) { setOpen(next); if (!next) setStep(1); } }}>
-    <DialogTrigger render={<Button variant={variant} />}><Plus data-icon="inline-start" />{label}</DialogTrigger>
+    <DialogTrigger render={<Button variant={variant} disabled={disabled} />}><Plus data-icon="inline-start" />{label}</DialogTrigger>
     <DialogContent className="sm:max-w-xl">
       <DialogHeader><DialogTitle>Add an SMTP sender</DialogTitle><DialogDescription>Complete three short steps. The connection is verified before encrypted credentials are stored.</DialogDescription></DialogHeader>
       <Tabs value={String(step)}><TabsList variant="line" className="w-full"><TabsTrigger value="1">Identity</TabsTrigger><TabsTrigger value="2">Connection</TabsTrigger><TabsTrigger value="3">Credentials</TabsTrigger></TabsList></Tabs>

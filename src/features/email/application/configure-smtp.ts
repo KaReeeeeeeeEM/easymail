@@ -41,6 +41,14 @@ export async function configureSmtp(formData: FormData): Promise<ActionResult> {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { success: false, message: parsed.error.issues[0]?.message ?? "Check the sender details." };
   const values = parsed.data;
+  const existingSenders = await db
+    .select({ id: smtpConfiguration.id })
+    .from(smtpConfiguration)
+    .where(eq(smtpConfiguration.organizationId, organizationId))
+    .limit(3);
+  if (existingSenders.length >= 3) {
+    return { success: false, message: "A workspace can have a maximum of 3 SMTP senders." };
+  }
   try {
     const transport = nodemailer.createTransport({
       host: values.host,
@@ -55,7 +63,7 @@ export async function configureSmtp(formData: FormData): Promise<ActionResult> {
   } catch {
     return { success: false, message: "SMTP verification failed. Check the host, port, security mode, and credentials." };
   }
-  const [existing] = await db.select({ id: smtpConfiguration.id }).from(smtpConfiguration).where(eq(smtpConfiguration.organizationId, organizationId)).limit(1);
+  const [existing] = existingSenders;
   const makeDefault = values.isDefault || !existing;
   if (makeDefault) await db.update(smtpConfiguration).set({ isDefault: false }).where(eq(smtpConfiguration.organizationId, organizationId));
   try {

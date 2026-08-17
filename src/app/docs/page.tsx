@@ -76,7 +76,7 @@ response.raise_for_status()`,
 };
 
 const requestFields = [
-  ["senderId", "UUID", "Optional", "Use a specific verified SMTP sender. The workspace default is used when omitted."],
+  ["senderId", "UUID", "Optional", "Confirm the sender assigned to the API key. The key's sender is always used when omitted."],
   [
     "to",
     "string | string[]",
@@ -167,7 +167,7 @@ export default function DocsPage() {
                 ],
                 [
                   "03",
-                  "Create an API key",
+                  "Create an API key and assign its SMTP sender",
                   "Copy the secret immediately and store it outside your source code.",
                 ],
               ].map(([number, title, description]) => (
@@ -199,7 +199,7 @@ export default function DocsPage() {
             <SectionHeading
               kicker="Identity"
               title="Authentication"
-              description="Every email request requires an organization-owned API key. Dashboard session cookies are never accepted by the public email endpoint."
+              description="Every email request requires an organization-owned API key associated with one SMTP sender. Dashboard session cookies are never accepted by the public email endpoint."
             />
             <SyntaxCodeBlock code={`Authorization: Bearer gms_your_secret_key`} language="text" />
             <p className="mt-5 leading-7 text-muted-foreground">
@@ -476,7 +476,7 @@ export default function DocsPage() {
               {[
                 [
                   "SMTP_NOT_CONFIGURED",
-                  "Connect a verified SMTP sender in the active workspace, or check senderId.",
+                  "Connect a verified SMTP sender and create or rotate a key associated with it.",
                 ],
                 [
                   "DELIVERY_FAILED",

@@ -34,6 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import { PageHeading } from "@/components/dashboard/page-heading";
 
@@ -43,14 +44,19 @@ type KeySummary = {
   start: string | null;
   createdAt: Date;
   enabled: boolean | null;
+  metadata: { senderId?: string } | null;
 };
+
+type SenderSummary = { id: string; label: string; senderEmail: string };
 
 export function ApiKeyManager({
   organizationId,
   initialKeys,
+  senders,
 }: {
   organizationId: string;
   initialKeys: KeySummary[];
+  senders: SenderSummary[];
 }) {
   const [keys, setKeys] = useState<KeySummary[]>(initialKeys);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
@@ -84,6 +90,7 @@ export function ApiKeyManager({
       const result = await authClient.apiKey.create({
         name: String(formData.get("name")),
         organizationId,
+        metadata: { senderId: String(formData.get("senderId")) },
       });
       if (result.error || !result.data) {
         toast.error(result.error?.message ?? "Could not create API key");
@@ -121,6 +128,9 @@ export function ApiKeyManager({
       const result = await authClient.apiKey.create({
         name: `${key.name ?? "API key"} (rotated)`,
         organizationId,
+        metadata: key.metadata?.senderId
+          ? key.metadata
+          : { senderId: senders[0]?.id },
       });
       if (result.error || !result.data)
         return toast.error(result.error?.message ?? "Could not rotate key");
@@ -145,7 +155,7 @@ export function ApiKeyManager({
         title="API keys"
         description="Create, search, rotate, and revoke the credentials your applications use."
         action={
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button onClick={() => setCreateOpen(true)} disabled={!senders.length}>
             <Plus data-icon="inline-start" />
             Create key
           </Button>
@@ -178,6 +188,23 @@ export function ApiKeyManager({
                   placeholder="Production website"
                   required
                 />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="key-sender">SMTP sender</FieldLabel>
+                <Select name="senderId" required>
+                  <SelectTrigger id="key-sender" className="w-full">
+                    <SelectValue placeholder="Select an SMTP sender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {senders.map((sender) => (
+                        <SelectItem key={sender.id} value={sender.id}>
+                          {sender.label} — {sender.senderEmail}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </Field>
               <DialogFooter>
                 <Button type="submit" disabled={Boolean(pendingAction)}>
@@ -219,6 +246,7 @@ export function ApiKeyManager({
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Key</TableHead>
+                <TableHead>Sender</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -231,13 +259,16 @@ export function ApiKeyManager({
                     {key.start ?? "gms_••••••••"}
                   </TableCell>
                   <TableCell>
+                    {senders.find((sender) => sender.id === key.metadata?.senderId)?.label ?? "Unassigned"}
+                  </TableCell>
+                  <TableCell>
                     <Badge variant="secondary">Active</Badge>
                   </TableCell>
                   <TableCell className="flex justify-end gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={Boolean(pendingAction)}
+                      disabled={Boolean(pendingAction) || !senders.length}
                       onClick={() => rotate(key)}
                     >
                       {pendingAction === `rotate:${key.id}` ? (
@@ -268,7 +299,7 @@ export function ApiKeyManager({
               {!visibleKeys.length && (
                 <TableRow>
                   <TableCell
-                    colSpan={4}
+                    colSpan={5}
                     className="h-28 text-center text-muted-foreground"
                   >
                     No API keys match your search.
