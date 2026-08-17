@@ -58,7 +58,6 @@ export const auth = betterAuth({
           data: {
             ...user,
             ...(user.email ? { email: normalizeGmailAddress(user.email) } : {}),
-            twoFactorEnabled: true,
           },
         }),
       },

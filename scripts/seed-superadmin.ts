@@ -19,13 +19,12 @@ const [existing] = await db.select({ id: user.id }).from(user).where(eq(user.ema
 const userId = existing?.id ?? randomUUID();
 
 await db.transaction(async (tx) => {
-  if (existing) await tx.update(user).set({ name: "easymail Superadmin", role: "SUPER_ADMIN", emailVerified: true, twoFactorEnabled: true, updatedAt: new Date() }).where(eq(user.id, userId));
-  else await tx.insert(user).values({ id: userId, name: "easymail Superadmin", email, role: "SUPER_ADMIN", emailVerified: true, twoFactorEnabled: true });
+  if (existing) await tx.update(user).set({ name: "easymail Superadmin", role: "SUPER_ADMIN", emailVerified: true, twoFactorEnabled: false, updatedAt: new Date() }).where(eq(user.id, userId));
+  else await tx.insert(user).values({ id: userId, name: "easymail Superadmin", email, role: "SUPER_ADMIN", emailVerified: true, twoFactorEnabled: false });
   const [credential] = await tx.select({ id: account.id }).from(account).where(and(eq(account.userId, userId), eq(account.providerId, "credential"))).limit(1);
   if (credential) await tx.update(account).set({ password: passwordHash, updatedAt: new Date() }).where(eq(account.id, credential.id));
   else await tx.insert(account).values({ id: randomUUID(), accountId: userId, providerId: "credential", userId, password: passwordHash });
-  const [factor] = await tx.select({ id: twoFactor.id }).from(twoFactor).where(eq(twoFactor.userId, userId)).limit(1);
-  if (!factor) await tx.insert(twoFactor).values({ id: randomUUID(), userId, secret: randomUUID(), backupCodes: "[]", verified: true });
+  await tx.delete(twoFactor).where(eq(twoFactor.userId, userId));
   await tx.insert(auditLog).values({ action: "SUPERADMIN_SEEDED", entity: "user", entityId: userId, description: "Super administrator credentials were provisioned.", actorId: userId, actorEmail: email });
 });
 await client.end();
