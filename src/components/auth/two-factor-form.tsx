@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { Fingerprint, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -13,7 +14,7 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 export function TwoFactorForm() {
   const router = useRouter();
-  const requested = useRef(false);
+  const [method, setMethod] = useState<"email" | null>(null);
   const [pending, setPending] = useState(false);
   const [sending, setSending] = useState(true);
 
@@ -28,11 +29,18 @@ export function TwoFactorForm() {
     if (showToast) toast.success("A new security code was sent to your Gmail inbox.");
   }
 
-  useEffect(() => {
-    if (requested.current) return;
-    requested.current = true;
-    void sendCode();
-  }, []);
+  async function selectEmail() { setMethod("email"); await sendCode(false); }
+
+  async function authenticatePasskey() {
+    setPending(true);
+    try {
+      const result = await authClient.signIn.passkey();
+      if (result?.error) return toast.error(result.error.message ?? "Biometric verification failed.");
+      toast.success("Biometric identity confirmed. Welcome back.");
+      router.replace("/dashboard"); router.refresh();
+    } catch { toast.error("Biometric verification was cancelled or unavailable."); }
+    finally { setPending(false); }
+  }
 
   async function submit(formData: FormData) {
     setPending(true);
@@ -48,6 +56,8 @@ export function TwoFactorForm() {
     router.refresh();
   }
 
+  if (!method) return <div className="flex flex-col gap-3"><p className="text-center text-sm text-muted-foreground">Choose how to verify this sign-in.</p><Button type="button" onClick={() => void selectEmail()} disabled={pending}><Mail data-icon="inline-start" />Email security code</Button><Button type="button" variant="outline" onClick={() => void authenticatePasskey()} disabled={pending}>{pending ? <Spinner data-icon="inline-start" /> : <Fingerprint data-icon="inline-start" />}{pending ? "Waiting for device…" : "Biometrics or passkey"}</Button></div>;
+
   return (
     <form onSubmit={(event) => { event.preventDefault(); void submit(new FormData(event.currentTarget)); }}>
       <FieldGroup>
@@ -60,6 +70,7 @@ export function TwoFactorForm() {
         </Field>
         <Button type="submit" disabled={pending || sending}>{pending && <Spinner data-icon="inline-start" />}{pending ? "Verifying code…" : "Verify and continue"}</Button>
         <Button type="button" variant="outline" disabled={pending || sending} onClick={() => void sendCode(true)}>{sending && <Spinner data-icon="inline-start" />}{sending ? "Sending code…" : "Send a new code"}</Button>
+        <Button type="button" variant="ghost" disabled={pending || sending} onClick={() => setMethod(null)}>Choose another method</Button>
       </FieldGroup>
     </form>
   );

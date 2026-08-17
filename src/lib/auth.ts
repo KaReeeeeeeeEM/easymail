@@ -1,6 +1,7 @@
 import "server-only";
 
 import { apiKey } from "@better-auth/api-key";
+import { passkey } from "@better-auth/passkey";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
@@ -102,6 +103,10 @@ export const auth = betterAuth({
     }),
   },
   plugins: [
+    passkey({
+      rpName: "easymail",
+      authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "preferred", userVerification: "required" },
+    }),
     emailOTP({
       otpLength: 6,
       expiresIn: 300,
