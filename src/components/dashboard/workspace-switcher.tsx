@@ -64,10 +64,10 @@ export function WorkspaceSwitcher({ organizations, activeOrganizationId }: { org
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<SidebarMenuButton size="lg" tooltip={active?.name ?? "Select workspace"} />}>
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary/15 text-primary"><Building2 /></span>
-            <span className="min-w-0 flex-1 text-left"><span className="block truncate font-medium">{active?.name ?? "Select workspace"}</span><span className="block text-xs text-muted-foreground">{organizations.length} of 5 workspaces</span></span>
-            {pending ? <Spinner /> : <ChevronsUpDown />}
+          <DropdownMenuTrigger render={<SidebarMenuButton size="lg" tooltip={active?.name ?? "Select workspace"} className="group-data-[collapsible=icon]:justify-center" />}>
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary"><Building2 /></span>
+            <span className="min-w-0 flex-1 text-left group-data-[collapsible=icon]:hidden"><span className="block truncate font-medium">{active?.name ?? "Select workspace"}</span><span className="block text-xs text-muted-foreground">{organizations.length} of 5 workspaces</span></span>
+            <span className="shrink-0 group-data-[collapsible=icon]:hidden">{pending ? <Spinner /> : <ChevronsUpDown />}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" sideOffset={6} className="min-w-64">
             <DropdownMenuGroup>

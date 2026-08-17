@@ -23,7 +23,7 @@ export function AppSidebar({ email, organizations, activeOrganizationId }: { ema
     <SidebarHeader className="items-center p-3">
       <div className="flex w-full justify-center group-data-[collapsible=icon]:hidden"><Logo /></div>
       <Link href="/dashboard" aria-label="Dashboard" className="hidden size-8 place-items-center rounded-lg bg-primary text-lg font-semibold text-primary-foreground group-data-[collapsible=icon]:grid">e</Link>
-      <div className="w-full"><WorkspaceSwitcher organizations={organizations} activeOrganizationId={activeOrganizationId} /></div>
+      <div className="w-full group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"><WorkspaceSwitcher organizations={organizations} activeOrganizationId={activeOrganizationId} /></div>
     </SidebarHeader>
     <SidebarContent><SidebarGroup><SidebarGroupLabel>Workspace</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{items.map(({ href, label, icon: Icon }) => <SidebarMenuItem key={href}><SidebarMenuButton render={<Link href={href} />} tooltip={label} isActive={pathname === href} className="data-active:bg-primary/15 data-active:text-primary"><Icon /><span>{label}</span></SidebarMenuButton></SidebarMenuItem>)}</SidebarMenu></SidebarGroupContent></SidebarGroup></SidebarContent>
     <SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton render={<Link href="/dashboard/settings" />} tooltip="Settings" isActive={pathname === "/dashboard/settings"} className="data-active:bg-primary/15 data-active:text-primary"><Settings /><span className="truncate">{email}</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
