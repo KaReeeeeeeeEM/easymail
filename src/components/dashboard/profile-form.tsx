@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { Save } from "lucide-react";
 
 export function ProfileForm({ name, email }: { name: string; email: string }) {
   const [pending, setPending] = useState(false);
@@ -23,6 +24,6 @@ export function ProfileForm({ name, email }: { name: string; email: string }) {
   return <form onSubmit={(event) => { event.preventDefault(); void submit(new FormData(event.currentTarget)); }}><FieldGroup>
     <Field><FieldLabel htmlFor="profile-name">Full name</FieldLabel><Input id="profile-name" name="name" defaultValue={name} placeholder="Your full name" minLength={2} required /></Field>
     <Field data-disabled><FieldLabel htmlFor="profile-email">Gmail address</FieldLabel><Input id="profile-email" value={email} placeholder="you@gmail.com" disabled /><FieldDescription>Your verified Gmail address is the identity for this account.</FieldDescription></Field>
-    <Button type="submit" disabled={pending}>{pending && <Spinner data-icon="inline-start" />}{pending ? "Saving…" : "Save profile"}</Button>
+    <Button type="submit" disabled={pending}>{pending ? <Spinner data-icon="inline-start" /> : <Save data-icon="inline-start" />}{pending ? "Saving…" : "Save profile"}</Button>
   </FieldGroup></form>;
 }

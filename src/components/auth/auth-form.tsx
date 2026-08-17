@@ -11,6 +11,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
 import { Spinner } from "@/components/ui/spinner";
+import { LogIn, UserPlus } from "lucide-react";
 import { meetsPasswordRequirements, PasswordRequirements } from "@/components/auth/password-requirements";
 
 export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
@@ -111,7 +112,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           <PasswordInput id="confirm-password" name="confirmPassword" autoComplete="new-password" placeholder="Repeat your password" minLength={10} maxLength={128} required />
         </Field>}
         <Button type="submit" disabled={pending}>
-          {pending && <Spinner data-icon="inline-start" />}
+          {pending ? <Spinner data-icon="inline-start" /> : isSignUp ? <UserPlus data-icon="inline-start" /> : <LogIn data-icon="inline-start" />}
           {pending ? (isSignUp ? "Creating account…" : "Signing in…") : (isSignUp ? "Create account" : "Sign in")}
         </Button>
         {!isSignUp && <FieldDescription className="text-center"><Link className="font-medium text-primary underline-offset-4 hover:underline" href="/forgot-password">Forgot your password?</Link></FieldDescription>}

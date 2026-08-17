@@ -208,9 +208,7 @@ export function ApiKeyManager({
               </Field>
               <DialogFooter>
                 <Button type="submit" disabled={Boolean(pendingAction)}>
-                  {pendingAction === "create" && (
-                    <Spinner data-icon="inline-start" />
-                  )}
+                  {pendingAction === "create" ? <Spinner data-icon="inline-start" /> : <KeyRound data-icon="inline-start" />}
                   {pendingAction === "create" ? "Creating key…" : "Create key"}
                 </Button>
               </DialogFooter>

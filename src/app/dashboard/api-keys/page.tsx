@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { ApiKeyManager } from "@/components/dashboard/api-key-manager";
 import { PageHeading } from "@/components/dashboard/page-heading";
 import { Button } from "@/components/ui/button";
-import { Building2 } from "lucide-react";
+import { Building2, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import {
   Empty,
@@ -62,6 +62,7 @@ export default async function ApiKeysPage() {
             </EmptyHeader>
             <EmptyContent>
               <Button render={<Link href="/dashboard" />}>
+                <LayoutDashboard data-icon="inline-start" />
                 Go to overview
               </Button>
             </EmptyContent>
