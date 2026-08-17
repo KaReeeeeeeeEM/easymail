@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ export function ForgotPasswordForm() {
     try {
       await authClient.requestPasswordReset({ email: String(formData.get("email")), redirectTo: `${window.location.origin}/reset-password` });
       toast.success("If that account exists, recovery instructions are on the way.");
+    } catch {
+      toast.error("Could not request recovery instructions. Please try again.");
     } finally {
       setPending(false);
     }

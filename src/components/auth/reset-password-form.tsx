@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";

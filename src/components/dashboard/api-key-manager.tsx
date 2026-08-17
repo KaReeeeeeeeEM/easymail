@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Copy, KeyRound, RefreshCw, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 import { authClient } from "@/lib/auth-client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -26,18 +26,22 @@ export function ApiKeyManager({ organizationId, initialKeys }: { organizationId:
     try {
       const result = await authClient.apiKey.create({ name: String(formData.get("name")), organizationId });
       if (result.error || !result.data) { toast.error(result.error?.message ?? "Could not create API key"); return; }
-      setSecret(result.data.key); await load();
+      setSecret(result.data.key); toast.success("API key created. Copy the secret now."); await load();
+    } catch {
+      toast.error("Could not create the API key. Please try again.");
     } finally { setPendingAction(null); }
   }
-  async function remove(id: string) { setPendingAction(`remove:${id}`); try { const result = await authClient.apiKey.delete({ keyId: id }); if (result.error) return toast.error(result.error.message); toast.success("API key revoked"); await load(); } finally { setPendingAction(null); } }
+  async function remove(id: string) { setPendingAction(`remove:${id}`); try { const result = await authClient.apiKey.delete({ keyId: id }); if (result.error) return toast.error(result.error.message ?? "Could not revoke the API key"); toast.success("API key revoked"); await load(); } catch { toast.error("Could not revoke the API key. Please try again."); } finally { setPendingAction(null); } }
   async function rotate(key: KeySummary) {
     setPendingAction(`rotate:${key.id}`);
     try {
       const result = await authClient.apiKey.create({ name: `${key.name ?? "API key"} (rotated)`, organizationId });
       if (result.error || !result.data) return toast.error(result.error?.message ?? "Could not rotate key");
       const revoked = await authClient.apiKey.delete({ keyId: key.id });
-      if (revoked.error) return toast.error(revoked.error.message);
-      setSecret(result.data.key); await load();
+      if (revoked.error) return toast.error(revoked.error.message ?? "Could not revoke the previous API key");
+      setSecret(result.data.key); toast.success("API key rotated. Copy the new secret now."); await load();
+    } catch {
+      toast.error("Could not rotate the API key. Please try again.");
     } finally { setPendingAction(null); }
   }
   return <div className="flex flex-col gap-6"><Card><CardHeader><CardTitle>Create API key</CardTitle><CardDescription>The secret is shown once. Store it in your application&apos;s secret manager.</CardDescription></CardHeader><CardContent><form onSubmit={(event) => { event.preventDefault(); void create(new FormData(event.currentTarget)); }}><FieldGroup><Field><FieldLabel htmlFor="key-name">Key name</FieldLabel><Input id="key-name" name="name" placeholder="Production website" required /></Field><Button disabled={Boolean(pendingAction)}>{pendingAction === "create" && <Spinner data-icon="inline-start" />}{pendingAction === "create" ? "Creating key…" : "Create key"}</Button></FieldGroup></form></CardContent></Card><Card><CardHeader><CardTitle>Workspace keys</CardTitle><CardDescription>Rotate a key immediately if it may have been exposed.</CardDescription></CardHeader><CardContent><Table><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Key</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{keys.map((key) => <TableRow key={key.id}><TableCell>{key.name}</TableCell><TableCell className="font-mono">{key.start ?? "gms_••••••••"}</TableCell><TableCell><Badge variant="secondary">Active</Badge></TableCell><TableCell className="flex justify-end gap-2"><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => rotate(key)}>{pendingAction === `rotate:${key.id}` ? <Spinner data-icon="inline-start" /> : <RefreshCw data-icon="inline-start" />}{pendingAction === `rotate:${key.id}` ? "Rotating…" : "Rotate"}</Button><Button variant="destructive" size="sm" disabled={Boolean(pendingAction)} onClick={() => remove(key.id)} aria-label={`Revoke ${key.name}`}>{pendingAction === `remove:${key.id}` ? <Spinner /> : <Trash2 />}</Button></TableCell></TableRow>)}</TableBody></Table></CardContent></Card><Dialog open={Boolean(secret)} onOpenChange={(open) => !open && setSecret(null)}><DialogContent><DialogHeader><DialogTitle>Copy your API key</DialogTitle><DialogDescription>This secret cannot be shown again.</DialogDescription></DialogHeader><Alert><KeyRound /><AlertTitle>New easymail key</AlertTitle><AlertDescription className="break-all font-mono">{secret}</AlertDescription></Alert><DialogFooter><Button onClick={() => { if (secret) void navigator.clipboard.writeText(secret); toast.success("Copied"); }}><Copy data-icon="inline-start" />Copy key</Button></DialogFooter></DialogContent></Dialog></div>;

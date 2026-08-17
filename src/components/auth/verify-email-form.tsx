@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";

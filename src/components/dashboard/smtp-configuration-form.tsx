@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 import { configureSmtp } from "@/features/email/application/configure-smtp";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ export function SmtpConfigurationForm() {
       const result = await configureSmtp(formData);
       if (result.success) toast.success(result.message);
       else toast.error(result.message);
+    } catch {
+      toast.error("Could not verify the sender. Please check the connection and try again.");
     } finally {
       setPending(false);
     }

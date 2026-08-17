@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,14 @@ export function WorkspaceSetup() {
     const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     try {
       const result = await authClient.organization.create({ name, slug });
-      if (result.error || !result.data) return setError(result.error?.message ?? "Could not create workspace");
+      if (result.error || !result.data) {
+        const message = result.error?.message ?? "Could not create workspace";
+        setError(message);
+        toast.error(message);
+        return;
+      }
       await authClient.organization.setActive({ organizationId: result.data.id });
+      toast.success("Workspace created successfully.");
       router.refresh();
     } finally {
       setPending(false);

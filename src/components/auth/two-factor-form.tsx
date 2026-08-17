@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";

@@ -4,7 +4,7 @@ import {
   Dancing_Script,
   Geist_Mono,
 } from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
+import { ReactToaster } from "@/components/ui/react-toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PageRevealObserver } from "@/components/page-reveal-observer";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -43,7 +43,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <TooltipProvider>{children}</TooltipProvider>
-          <Toaster richColors />
+          <ReactToaster />
         </ThemeProvider>
         <PageRevealObserver />
       </body>
