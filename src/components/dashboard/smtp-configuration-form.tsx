@@ -25,6 +25,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function SmtpConfigurationForm({
   label = "Add sender",
@@ -39,6 +47,7 @@ export function SmtpConfigurationForm({
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [pending, setPending] = useState(false);
+  const [hostChoice, setHostChoice] = useState("smtp.gmail.com");
   async function submit(formData: FormData) {
     setPending(true);
     try {
@@ -139,37 +148,80 @@ export function SmtpConfigurationForm({
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="host">SMTP host</FieldLabel>
-                <Input
-                  id="host"
-                  name="host"
-                  placeholder="smtp.gmail.com"
+                <Select
+                  name={hostChoice === "custom" ? undefined : "host"}
+                  value={hostChoice}
+                  onValueChange={(value) => value && setHostChoice(value)}
                   required
-                />
+                >
+                  <SelectTrigger id="host" className="w-full">
+                    <SelectValue placeholder="Select an SMTP host" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="smtp.gmail.com">
+                        Gmail — smtp.gmail.com
+                      </SelectItem>
+                      <SelectItem value="smtp.office365.com">
+                        Microsoft 365 — smtp.office365.com
+                      </SelectItem>
+                      <SelectItem value="smtp.mail.yahoo.com">
+                        Yahoo — smtp.mail.yahoo.com
+                      </SelectItem>
+                      <SelectItem value="smtp.zoho.com">
+                        Zoho — smtp.zoho.com
+                      </SelectItem>
+                      <SelectItem value="email-smtp.us-east-1.amazonaws.com">
+                        Amazon SES — US East
+                      </SelectItem>
+                      <SelectItem value="custom">Custom SMTP host</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                {hostChoice === "custom" && (
+                  <Input
+                    name="host"
+                    placeholder="smtp.your-provider.com"
+                    aria-label="Custom SMTP host"
+                    required
+                  />
+                )}
               </Field>
               <Field>
                 <FieldLabel htmlFor="port">SMTP port</FieldLabel>
-                <Input
-                  id="port"
-                  name="port"
-                  type="number"
-                  min="1"
-                  max="65535"
-                  defaultValue="465"
-                  placeholder="465"
-                  required
-                />
+                <Select name="port" defaultValue="465" required>
+                  <SelectTrigger id="port" className="w-full">
+                    <SelectValue placeholder="Select an SMTP port" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="465">465 — SSL/TLS</SelectItem>
+                      <SelectItem value="587">587 — STARTTLS</SelectItem>
+                      <SelectItem value="2525">
+                        2525 — Alternative STARTTLS
+                      </SelectItem>
+                      <SelectItem value="25">25 — Standard SMTP</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </Field>
               <Field>
                 <FieldLabel htmlFor="secure">Connection security</FieldLabel>
-                <select
-                  id="secure"
-                  name="secure"
-                  defaultValue="true"
-                  className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-                >
-                  <option value="true">SSL/TLS (usually port 465)</option>
-                  <option value="false">STARTTLS (usually port 587)</option>
-                </select>
+                <Select name="secure" defaultValue="true" required>
+                  <SelectTrigger id="secure" className="w-full">
+                    <SelectValue placeholder="Select connection security" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="true">
+                        SSL/TLS (usually port 465)
+                      </SelectItem>
+                      <SelectItem value="false">
+                        STARTTLS (usually port 587)
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </Field>
             </FieldGroup>
           </div>
@@ -235,7 +287,11 @@ export function SmtpConfigurationForm({
               </Button>
             ) : (
               <Button type="submit" disabled={pending}>
-                {pending ? <Spinner data-icon="inline-start" /> : <ShieldCheck data-icon="inline-start" />}
+                {pending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <ShieldCheck data-icon="inline-start" />
+                )}
                 {pending ? "Verifying sender…" : "Verify and save sender"}
               </Button>
             )}
