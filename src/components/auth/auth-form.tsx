@@ -7,13 +7,7 @@ import toast from "react-hot-toast";
 
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
 import { Spinner } from "@/components/ui/spinner";
@@ -21,23 +15,19 @@ import { Spinner } from "@/components/ui/spinner";
 export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
   const isSignUp = mode === "sign-up";
 
   async function submit(formData: FormData) {
     setPending(true);
-    setError("");
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
     if (isSignUp && password !== String(formData.get("confirmPassword"))) {
       setPending(false);
-      setError("Passwords do not match");
       toast.error("Passwords do not match.");
       return;
     }
     if (!/^[^\s@]+@gmail\.com$/i.test(email.trim())) {
       setPending(false);
-      setError("Use a valid Gmail address ending in @gmail.com.");
       toast.error("Use a valid Gmail address ending in @gmail.com.");
       return;
     }
@@ -50,7 +40,6 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       : authClient.signIn.email({ email, password })).finally(() => setPending(false));
     if (result.error) {
       const message = result.error.message ?? "Unable to continue";
-      setError(message);
       toast.error(message);
       return;
     }
@@ -113,11 +102,6 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
           <PasswordInput id="confirm-password" name="confirmPassword" autoComplete="new-password" placeholder="Repeat your password" minLength={10} maxLength={128} required />
         </Field>}
-        {error && (
-          <Field data-invalid>
-            <FieldError>{error}</FieldError>
-          </Field>
-        )}
         <Button type="submit" disabled={pending}>
           {pending && <Spinner data-icon="inline-start" />}
           {pending ? (isSignUp ? "Creating account…" : "Signing in…") : (isSignUp ? "Create account" : "Sign in")}

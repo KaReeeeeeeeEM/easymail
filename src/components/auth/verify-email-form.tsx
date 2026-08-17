@@ -18,17 +18,14 @@ export function VerifyEmailForm() {
   const email = params.get("email")?.trim().toLowerCase() ?? "";
   const [pending, setPending] = useState(false);
   const [resending, setResending] = useState(false);
-  const [error, setError] = useState("");
 
   async function verify(formData: FormData) {
     if (!email) return;
     setPending(true);
-    setError("");
     const otp = String(formData.get("otp")).replace(/\D/g, "");
     const result = await authClient.emailOtp.verifyEmail({ email, otp }).finally(() => setPending(false));
     if (result.error) {
       const message = result.error.message ?? "The verification code is invalid or expired.";
-      setError(message);
       toast.error(message);
       return;
     }
@@ -39,11 +36,9 @@ export function VerifyEmailForm() {
   async function resend() {
     if (!email) return;
     setResending(true);
-    setError("");
     const result = await authClient.emailOtp.sendVerificationOtp({ email, type: "email-verification" }).finally(() => setResending(false));
     if (result.error) {
       const message = result.error.message ?? "A new code could not be sent yet.";
-      setError(message);
       toast.error(message);
       return;
     }
@@ -58,11 +53,10 @@ export function VerifyEmailForm() {
         <Field>
           <FieldLabel htmlFor="account-verification-code">Verification code</FieldLabel>
           <InputOTP id="account-verification-code" name="otp" maxLength={6} pattern={REGEXP_ONLY_DIGITS} disabled={pending || resending} autoFocus required containerClassName="justify-center">
-            <InputOTPGroup>{[0, 1, 2, 3, 4, 5].map((index) => <InputOTPSlot key={index} index={index} className="size-11 text-lg" aria-invalid={Boolean(error)} />)}</InputOTPGroup>
+            <InputOTPGroup>{[0, 1, 2, 3, 4, 5].map((index) => <InputOTPSlot key={index} index={index} className="size-11 text-lg" />)}</InputOTPGroup>
           </InputOTP>
           <FieldDescription>Enter the six-digit code sent to {email}. It expires in 5 minutes.</FieldDescription>
         </Field>
-        {error && <Field data-invalid><FieldError>{error}</FieldError></Field>}
         <Button type="submit" disabled={pending || resending}>{pending && <Spinner data-icon="inline-start" />}{pending ? "Verifying account…" : "Verify and create account"}</Button>
         <Button type="button" variant="outline" disabled={pending || resending} onClick={() => void resend()}>{resending && <Spinner data-icon="inline-start" />}{resending ? "Sending new code…" : "Send a new code"}</Button>
       </FieldGroup>
