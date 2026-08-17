@@ -21,5 +21,5 @@ export async function getDashboardData(organizationId: string) {
   const accepted = deliveries.filter((item) => item.status === "sent").length;
   const failed = deliveries.filter((item) => item.status === "failed").length;
   const completed = accepted + failed;
-  return { metrics: { total: deliveries.length, accepted, failed, pending: deliveries.filter((item) => item.status === "pending").length, acceptanceRate: completed ? Math.round((accepted / completed) * 1000) / 10 : 0, senders: senders.length }, trend, recent: deliveries.slice(0, 8), updatedAt: new Date() };
+  return { metrics: { total: deliveries.length, accepted, failed, pending: deliveries.filter((item) => item.status === "pending").length, acceptanceRate: completed ? Math.round((accepted / completed) * 1000) / 10 : 0, senders: senders.length }, trend, recent: deliveries.slice(0, 50), updatedAt: new Date() };
 }
