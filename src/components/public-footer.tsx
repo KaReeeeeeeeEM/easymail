@@ -70,6 +70,8 @@ export function PublicFooter() {
           <div className="flex gap-5">
             <Link href="/docs#security">Security</Link>
             <Link href="/docs">API documentation</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
           </div>
         </div>
       </div>

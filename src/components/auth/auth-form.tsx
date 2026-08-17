@@ -7,17 +7,28 @@ import toast from "react-hot-toast";
 
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { LogIn, UserPlus } from "lucide-react";
-import { meetsPasswordRequirements, PasswordRequirements } from "@/components/auth/password-requirements";
+import {
+  meetsPasswordRequirements,
+  PasswordRequirements,
+} from "@/components/auth/password-requirements";
 
 export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const isSignUp = mode === "sign-up";
 
   async function submit(formData: FormData) {
@@ -34,29 +45,48 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       toast.error("Passwords do not match.");
       return;
     }
+    if (isSignUp && (!acceptedTerms || !acceptedPrivacy)) {
+      setPending(false);
+      toast.error(
+        "Agree to the Terms and Privacy Policy to create your account.",
+      );
+      return;
+    }
     if (!/^[^\s@]+@gmail\.com$/i.test(email.trim())) {
       setPending(false);
       toast.error("Use a valid Gmail address ending in @gmail.com.");
       return;
     }
-    const result = await (isSignUp
-      ? authClient.signUp.email({
-          email,
-          password,
-          name: String(formData.get("name")),
-        })
-      : authClient.signIn.email({ email, password })).finally(() => setPending(false));
+    const result = await (
+      isSignUp
+        ? authClient.signUp.email({
+            email,
+            password,
+            name: String(formData.get("name")),
+            acceptedTerms,
+            acceptedPrivacy,
+          })
+        : authClient.signIn.email({ email, password })
+    ).finally(() => setPending(false));
     if (result.error) {
       const message = result.error.message ?? "Unable to continue";
       toast.error(message);
       return;
     }
     if (isSignUp) {
-      toast.success("Verification code sent. Check your Gmail inbox to finish creating your account.");
-      router.push(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+      toast.success(
+        "Verification code sent. Check your Gmail inbox to finish creating your account.",
+      );
+      router.push(
+        `/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`,
+      );
       return;
     }
-    if (result.data && "twoFactorRedirect" in result.data && result.data.twoFactorRedirect) {
+    if (
+      result.data &&
+      "twoFactorRedirect" in result.data &&
+      result.data.twoFactorRedirect
+    ) {
       router.push("/two-factor");
       return;
     }
@@ -65,7 +95,12 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   }
 
   return (
-    <form onSubmit={(event) => { event.preventDefault(); void submit(new FormData(event.currentTarget)); }}>
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        void submit(new FormData(event.currentTarget));
+      }}
+    >
       <FieldGroup>
         {isSignUp && (
           <Field>
@@ -92,7 +127,11 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             required
           />
         </Field>
-        {isSignUp && <FieldDescription>Only Gmail addresses ending in @gmail.com can register.</FieldDescription>}
+        {isSignUp && (
+          <FieldDescription>
+            Only Gmail addresses ending in @gmail.com can register.
+          </FieldDescription>
+        )}
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
           <PasswordInput
@@ -107,15 +146,93 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           />
           {isSignUp && <PasswordRequirements password={password} />}
         </Field>
-        {isSignUp && <Field>
-          <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
-          <PasswordInput id="confirm-password" name="confirmPassword" autoComplete="new-password" placeholder="Repeat your password" minLength={10} maxLength={128} required />
-        </Field>}
-        <Button type="submit" disabled={pending}>
-          {pending ? <Spinner data-icon="inline-start" /> : isSignUp ? <UserPlus data-icon="inline-start" /> : <LogIn data-icon="inline-start" />}
-          {pending ? (isSignUp ? "Creating account…" : "Signing in…") : (isSignUp ? "Create account" : "Sign in")}
+        {isSignUp && (
+          <Field>
+            <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
+            <PasswordInput
+              id="confirm-password"
+              name="confirmPassword"
+              autoComplete="new-password"
+              placeholder="Repeat your password"
+              minLength={10}
+              maxLength={128}
+              required
+            />
+          </Field>
+        )}
+        {isSignUp && (
+          <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-4">
+            <Field orientation="horizontal">
+              <Checkbox
+                id="accept-terms"
+                checked={acceptedTerms}
+                onCheckedChange={setAcceptedTerms}
+                aria-required="true"
+              />
+              <FieldLabel htmlFor="accept-terms" className="font-normal">
+                I agree to the{" "}
+                <Link
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                  href="/terms"
+                  target="_blank"
+                >
+                  Terms and Conditions
+                </Link>
+                .
+              </FieldLabel>
+            </Field>
+            <Field orientation="horizontal">
+              <Checkbox
+                id="accept-privacy"
+                checked={acceptedPrivacy}
+                onCheckedChange={setAcceptedPrivacy}
+                aria-required="true"
+              />
+              <FieldLabel htmlFor="accept-privacy" className="font-normal">
+                I acknowledge the{" "}
+                <Link
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                  href="/privacy"
+                  target="_blank"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </FieldLabel>
+            </Field>
+          </div>
+        )}
+        <Button
+          type="submit"
+          disabled={
+            pending || (isSignUp && (!acceptedTerms || !acceptedPrivacy))
+          }
+        >
+          {pending ? (
+            <Spinner data-icon="inline-start" />
+          ) : isSignUp ? (
+            <UserPlus data-icon="inline-start" />
+          ) : (
+            <LogIn data-icon="inline-start" />
+          )}
+          {pending
+            ? isSignUp
+              ? "Creating account…"
+              : "Signing in…"
+            : isSignUp
+              ? "Create account"
+              : "Sign in"}
         </Button>
-        {!isSignUp && <FieldDescription className="text-center"><Link className="font-medium text-primary underline-offset-4 hover:underline" href="/forgot-password">Forgot your password?</Link></FieldDescription>}
+        {!isSignUp && (
+          <FieldDescription className="text-center">
+            <Link
+              className="font-medium text-primary underline-offset-4 hover:underline"
+              href="/forgot-password"
+            >
+              Forgot your password?
+            </Link>
+          </FieldDescription>
+        )}
         <FieldDescription className="text-center">
           {isSignUp ? "Already registered?" : "New here?"}{" "}
           <Link

@@ -24,6 +24,10 @@ export const user = pgTable("user", {
   image: text("image"),
   twoFactorEnabled: boolean("two_factor_enabled").default(true).notNull(),
   mustChangePassword: boolean("must_change_password").default(false).notNull(),
+  acceptedTerms: boolean("accepted_terms").default(false).notNull(),
+  acceptedPrivacy: boolean("accepted_privacy").default(false).notNull(),
+  legalAcceptedAt: timestamp("legal_accepted_at"),
+  legalVersion: text("legal_version"),
   role: text("role").default("USER").notNull(),
   banned: boolean("banned").default(false),
   banReason: text("ban_reason"),
@@ -35,13 +39,25 @@ export const user = pgTable("user", {
     .notNull(),
 });
 
-export const passkey = pgTable("passkey", {
-  id: text("id").primaryKey(), name: text("name"), publicKey: text("public_key").notNull(),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  credentialID: text("credential_id").notNull().unique(), counter: integer("counter").notNull(),
-  deviceType: text("device_type").notNull(), backedUp: boolean("backed_up").notNull(),
-  transports: text("transports"), createdAt: timestamp("created_at").defaultNow(), aaguid: text("aaguid"),
-}, (table) => [index("passkey_userId_idx").on(table.userId)]);
+export const passkey = pgTable(
+  "passkey",
+  {
+    id: text("id").primaryKey(),
+    name: text("name"),
+    publicKey: text("public_key").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    credentialID: text("credential_id").notNull().unique(),
+    counter: integer("counter").notNull(),
+    deviceType: text("device_type").notNull(),
+    backedUp: boolean("backed_up").notNull(),
+    transports: text("transports"),
+    createdAt: timestamp("created_at").defaultNow(),
+    aaguid: text("aaguid"),
+  },
+  (table) => [index("passkey_userId_idx").on(table.userId)],
+);
 
 export const twoFactor = pgTable(
   "two_factor",
@@ -53,7 +69,9 @@ export const twoFactor = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     verified: boolean("verified").default(true).notNull(),
-    failedVerificationCount: integer("failed_verification_count").default(0).notNull(),
+    failedVerificationCount: integer("failed_verification_count")
+      .default(0)
+      .notNull(),
     lockedUntil: timestamp("locked_until"),
   },
   (table) => [index("twoFactor_userId_idx").on(table.userId)],
