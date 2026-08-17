@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.startsWith("application/json")) return errorResponse(415, "UNSUPPORTED_MEDIA_TYPE", "Use application/json", requestId);
   const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > 256_000) return errorResponse(413, "PAYLOAD_TOO_LARGE", "Request body exceeds 256 KB", requestId);
+  if (contentLength > 4_500_000) return errorResponse(413, "PAYLOAD_TOO_LARGE", "Request body exceeds 4.5 MB", requestId);
 
   const authorization = request.headers.get("authorization");
   const key = request.headers.get("x-api-key") ?? (authorization?.startsWith("Bearer ") ? authorization.slice(7) : null);

@@ -37,10 +37,16 @@ const examples = {
   -H "Idempotency-Key: receipt-order-9382" \\
   -d '{
     "to": "customer@example.com",
+    "cc": ["finance@example.com"],
     "subject": "Your receipt",
-    "text": "Thanks for your order."
+    "text": "Thanks for your order.",
+    "html": "<h1>Your receipt</h1><p>Thanks for your order.</p>",
+    "attachments": [{"filename":"receipt.pdf","content":"BASE64_FILE_CONTENT","contentType":"application/pdf"}]
   }'`,
-  javascript: `const response = await fetch("https://your-domain.com/api/v1/emails", {
+  javascript: `import { readFile } from "node:fs/promises";
+
+const receiptBuffer = await readFile("receipt.pdf");
+const response = await fetch("https://your-domain.com/api/v1/emails", {
   method: "POST",
   headers: {
     Authorization: \`Bearer \${process.env.EASYMAIL_API_KEY}\`,
@@ -49,15 +55,22 @@ const examples = {
   },
   body: JSON.stringify({
     to: "customer@example.com",
+    cc: ["finance@example.com"],
     subject: "Your receipt",
     text: "Thanks for your order.",
+    html: "<h1>Your receipt</h1><p>Thanks for your order.</p>",
+    attachments: [{ filename: "receipt.pdf", content: receiptBuffer.toString("base64"), contentType: "application/pdf" }],
   }),
 });
 
 const result = await response.json();
 if (!response.ok) throw new Error(result.error.code);`,
-  python: `import os
+  python: `import base64
+import os
 import requests
+
+with open("receipt.pdf", "rb") as file:
+    receipt_base64 = base64.b64encode(file.read()).decode()
 
 response = requests.post(
     "https://your-domain.com/api/v1/emails",
@@ -67,8 +80,11 @@ response = requests.post(
     },
     json={
         "to": "customer@example.com",
+        "cc": ["finance@example.com"],
         "subject": "Your receipt",
         "text": "Thanks for your order.",
+        "html": "<h1>Your receipt</h1><p>Thanks for your order.</p>",
+        "attachments": [{"filename": "receipt.pdf", "content": receipt_base64, "contentType": "application/pdf"}],
     },
     timeout=30,
 )
@@ -109,13 +125,14 @@ const requestFields = [
   ["cc", "string[]", "Optional", "Up to 20 carbon-copy recipients."],
   ["bcc", "string[]", "Optional", "Up to 20 blind-carbon-copy recipients."],
   ["replyTo", "string", "Optional", "Address that receives replies."],
+  ["attachments", "Attachment[]", "Optional", "Up to 3 files. Send base64 content with a filename and optional contentType; total request size is 4.5 MB."],
 ];
 const errors = [
   ["400", "INVALID_JSON", "The request body is not valid JSON."],
   ["401", "API_KEY_REQUIRED", "No API key was supplied."],
   ["401", "INVALID_API_KEY", "The key is invalid, revoked, or expired."],
   ["409", "SMTP_NOT_CONFIGURED", "The workspace has no matching SMTP sender."],
-  ["413", "PAYLOAD_TOO_LARGE", "The request exceeds 256 KB."],
+  ["413", "PAYLOAD_TOO_LARGE", "The request exceeds 4.5 MB."],
   ["415", "UNSUPPORTED_MEDIA_TYPE", "Content-Type is not application/json."],
   ["422", "VALIDATION_ERROR", "One or more request fields are invalid."],
   ["502", "DELIVERY_FAILED", "The SMTP provider did not accept the message."],

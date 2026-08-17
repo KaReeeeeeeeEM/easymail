@@ -52,7 +52,14 @@ export async function sendOrganizationEmail(input: SendEmailInput, context: { or
       greetingTimeout: 10_000,
       socketTimeout: 20_000,
     });
-    const message = { ...input };
+    const message = {
+      ...input,
+      attachments: input.attachments?.map((attachment) => ({
+        filename: attachment.filename,
+        content: Buffer.from(attachment.content, "base64"),
+        contentType: attachment.contentType,
+      })),
+    };
     delete message.senderId;
     const result = await transporter.sendMail({
       from: { name: configuration.senderName, address: configuration.senderEmail },

@@ -14,4 +14,14 @@ describe("sendEmailSchema", () => {
   it("rejects unknown fields", () => {
     expect(sendEmailSchema.safeParse({ to: "person@example.com", subject: "Hello", text: "World", from: "spoof@example.com" }).success).toBe(false);
   });
+
+  it("accepts HTML, CC, and base64 attachments", () => {
+    expect(sendEmailSchema.safeParse({
+      to: "person@example.com",
+      cc: ["copy@example.com"],
+      subject: "Hello",
+      html: "<p>World</p>",
+      attachments: [{ filename: "hello.txt", content: "SGVsbG8=", contentType: "text/plain" }],
+    }).success).toBe(true);
+  });
 });
