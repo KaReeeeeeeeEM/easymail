@@ -23,7 +23,7 @@ export function WorkspaceSetup() {
     const slug = `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${crypto.randomUUID().slice(0, 6)}`;
     try {
       const result = await authClient.organization.create({ name, slug });
-      if (result.error || !result.data) return toast.error(result.error?.message ?? "Could not create workspace");
+      if (result.error || !result.data) return toast.error(result.error?.message ?? "You can create a maximum of 5 workspaces.");
       const active = await authClient.organization.setActive({ organizationId: result.data.id });
       if (active.error) return toast.error(active.error.message ?? "Workspace was created but could not be opened.");
       toast.success("Workspace created successfully.");
@@ -42,7 +42,7 @@ export function WorkspaceSetup() {
       <EmptyContent><DialogTrigger render={<Button />}><Plus data-icon="inline-start" />Create workspace</DialogTrigger></EmptyContent>
     </Empty>
     <DialogContent>
-      <DialogHeader><DialogTitle>Create your first workspace</DialogTitle><DialogDescription>Use your name for a personal service or your organization name for a shared service.</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>Create your first workspace</DialogTitle><DialogDescription>Use your name for a personal service or your organization name for a shared service. Each account can create up to 5 workspaces.</DialogDescription></DialogHeader>
       <form onSubmit={(event) => { event.preventDefault(); void create(new FormData(event.currentTarget)); }}>
         <FieldGroup><Field><FieldLabel htmlFor="workspace-name">Workspace name</FieldLabel><Input id="workspace-name" name="name" placeholder="Acme Operations" autoFocus required minLength={2} maxLength={80} /></Field><DialogFooter><Button type="submit" disabled={pending}>{pending && <Spinner data-icon="inline-start" />}{pending ? "Creating workspace…" : "Create workspace"}</Button></DialogFooter></FieldGroup>
       </form>

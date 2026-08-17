@@ -16,9 +16,16 @@ export default async function DashboardLayout({
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/sign-in");
+  const organizations = await auth.api.listOrganizations({
+    headers: await headers(),
+  });
   return (
     <SidebarProvider>
-      <AppSidebar email={session.user.email} />
+      <AppSidebar
+        email={session.user.email}
+        organizations={organizations}
+        activeOrganizationId={session.session.activeOrganizationId ?? null}
+      />
       <SidebarInset className="bg-muted/20">
         <DashboardHeader email={session.user.email} />
         <div className="flex-1 p-5 sm:p-8">{children}</div>

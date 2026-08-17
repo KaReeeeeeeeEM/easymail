@@ -141,7 +141,10 @@ export const auth = betterAuth({
       trustDeviceMaxAge: 0,
       accountLockout: { enabled: true, maxFailedAttempts: 5, durationSeconds: 900 },
     }),
-    organization({ teams: { enabled: true } }),
+    organization({
+      organizationLimit: 5,
+      teams: { enabled: true },
+    }),
     apiKey({
       references: "organization",
       defaultPrefix: "gms_",
