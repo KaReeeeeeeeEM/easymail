@@ -11,16 +11,23 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
 import { Spinner } from "@/components/ui/spinner";
+import { meetsPasswordRequirements, PasswordRequirements } from "@/components/auth/password-requirements";
 
 export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [password, setPassword] = useState("");
   const isSignUp = mode === "sign-up";
 
   async function submit(formData: FormData) {
     setPending(true);
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
+    if (isSignUp && !meetsPasswordRequirements(password)) {
+      setPending(false);
+      toast.error("Please meet every password requirement.");
+      return;
+    }
     if (isSignUp && password !== String(formData.get("confirmPassword"))) {
       setPending(false);
       toast.error("Passwords do not match.");
@@ -94,9 +101,10 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             placeholder="Enter your password"
             minLength={10}
             maxLength={128}
+            onChange={(event) => setPassword(event.target.value)}
             required
           />
-          {isSignUp && <FieldDescription>Use between 10 and 128 characters.</FieldDescription>}
+          {isSignUp && <PasswordRequirements password={password} />}
         </Field>
         {isSignUp && <Field>
           <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
