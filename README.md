@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./public/easymail-wordmark.svg" alt="EasyMail" width="320" />
+  <img src="public/easymail-wordmark.png" alt="EasyMail" width="320" />
   <p><strong>A reusable, organization-aware SMTP email API for every application you build.</strong></p>
 </div>
 
