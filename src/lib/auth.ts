@@ -8,9 +8,11 @@ import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { emailOTP, openAPI, organization, twoFactor } from "better-auth/plugins";
 import { randomUUID } from "node:crypto";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import * as authSchema from "@/db/auth-schema";
+import { smtpConfiguration } from "@/db/schema";
 import { normalizeGmailAddress as validateGmailAddress } from "@/lib/gmail-address";
 
 function normalizeGmailAddress(email: string) {
@@ -99,6 +101,23 @@ export const auth = betterAuth({
         throw new APIError("FORBIDDEN", {
           message: "Email two-factor authentication is required for every account.",
         });
+      }
+    }),
+    after: createAuthMiddleware(async (context) => {
+      if (context.path !== "/api-key/create") return;
+      const session = context.context.session;
+      const body = context.body as { name?: string; organizationId?: string; metadata?: { senderId?: string } } | undefined;
+      const organizationId = body?.organizationId;
+      const senderId = body?.metadata?.senderId;
+      if (!session?.user || !organizationId || !senderId) return;
+      try {
+        const [workspace] = await db.select({ name: authSchema.organization.name }).from(authSchema.organization).where(eq(authSchema.organization.id, organizationId)).limit(1);
+        const [sender] = await db.select({ label: smtpConfiguration.label }).from(smtpConfiguration).where(and(eq(smtpConfiguration.id, senderId), eq(smtpConfiguration.organizationId, organizationId))).limit(1);
+        if (!workspace || !sender) return;
+        const { sendApiKeyCreatedEmail } = await import("@/features/email/infrastructure/platform-mailer");
+        await sendApiKeyCreatedEmail({ email: session.user.email, name: session.user.name, keyName: body.name ?? "Unnamed key", workspaceName: workspace.name, senderLabel: sender.label });
+      } catch (error) {
+        console.error("Failed to send API key creation notification", error);
       }
     }),
   },

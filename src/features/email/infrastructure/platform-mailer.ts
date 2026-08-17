@@ -50,6 +50,18 @@ export async function sendPasswordResetEmail({ email, name, url }: { email: stri
   await sendAccountEmail({ to: email, name, subject: "Reset your password", message: "Use this secure, single-use link to choose a new password. It expires in 15 minutes.", actionLabel: "Reset password", actionUrl: url });
 }
 
+export async function sendApiKeyCreatedEmail({ email, name, keyName, workspaceName, senderLabel }: { email: string; name: string; keyName: string; workspaceName: string; senderLabel: string }) {
+  const origin = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "https://easymail.almareem.com").replace(/\/$/, "");
+  await sendAccountEmail({
+    to: email,
+    name,
+    subject: "A new API key was created",
+    message: `The API key “${keyName}” was created in workspace “${workspaceName}” and assigned to sender “${senderLabel}”. The secret is never included in email. If this was not you, revoke the key immediately.`,
+    actionLabel: "Review API keys",
+    actionUrl: `${origin}/dashboard/api-keys`,
+  });
+}
+
 export async function sendTwoFactorCodeEmail({ email, name, otp }: { email: string; name: string; otp: string }) {
   const { from, transporter: mailer } = mailTransport();
   await mailer.sendMail({
