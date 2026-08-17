@@ -85,7 +85,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             type="email"
             autoComplete="email"
             placeholder="you@gmail.com"
-            pattern="[^\\s@]+@gmail\\.com"
+            pattern="[A-Za-z0-9._%+-]+@gmail[.]com"
             title="Use a Gmail address ending in @gmail.com"
             required
           />
