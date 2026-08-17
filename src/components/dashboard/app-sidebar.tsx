@@ -1,7 +1,8 @@
 "use client";
 
-import { BookOpen, KeyRound, LayoutDashboard, Settings, Send } from "lucide-react";
+import { BookOpen, KeyRound, LayoutDashboard, Settings, Send, UserRound } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Logo } from "@/components/logo";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
@@ -10,9 +11,11 @@ const items = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/api-keys", label: "API keys", icon: KeyRound },
   { href: "/dashboard/sender", label: "SMTP senders", icon: Send },
-  { href: "/docs", label: "Documentation", icon: BookOpen },
+  { href: "/dashboard/docs", label: "Documentation", icon: BookOpen },
+  { href: "/dashboard/profile", label: "Profile", icon: UserRound },
 ];
 
 export function AppSidebar({ email }: { email: string }) {
-  return <Sidebar><SidebarHeader className="p-5"><Logo /></SidebarHeader><SidebarContent><SidebarGroup><SidebarGroupLabel>Workspace</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{items.map(({ href, label, icon: Icon }) => <SidebarMenuItem key={href}><SidebarMenuButton render={<Link href={href} />}><Icon /><span>{label}</span></SidebarMenuButton></SidebarMenuItem>)}</SidebarMenu></SidebarGroupContent></SidebarGroup></SidebarContent><SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton render={<Link href="/dashboard/settings" />}><Settings /><span className="truncate">{email}</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter></Sidebar>;
+  const pathname = usePathname();
+  return <Sidebar collapsible="icon"><SidebarHeader className="p-3 group-data-[collapsible=icon]:items-center"><div className="group-data-[collapsible=icon]:hidden"><Logo /></div><Link href="/dashboard" aria-label="Dashboard" className="hidden size-8 place-items-center rounded-lg bg-primary text-lg font-semibold text-primary-foreground group-data-[collapsible=icon]:grid">e</Link></SidebarHeader><SidebarContent><SidebarGroup><SidebarGroupLabel>Workspace</SidebarGroupLabel><SidebarGroupContent><SidebarMenu>{items.map(({ href, label, icon: Icon }) => <SidebarMenuItem key={href}><SidebarMenuButton render={<Link href={href} />} tooltip={label} isActive={pathname === href} className="data-active:bg-primary/15 data-active:text-primary"><Icon /><span>{label}</span></SidebarMenuButton></SidebarMenuItem>)}</SidebarMenu></SidebarGroupContent></SidebarGroup></SidebarContent><SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton render={<Link href="/dashboard/settings" />} tooltip="Settings" isActive={pathname === "/dashboard/settings"} className="data-active:bg-primary/15 data-active:text-primary"><Settings /><span className="truncate">{email}</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter></Sidebar>;
 }

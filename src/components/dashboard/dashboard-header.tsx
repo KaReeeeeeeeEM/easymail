@@ -17,6 +17,8 @@ const pageNames: Record<string, string> = {
   "/dashboard/api-keys": "API keys",
   "/dashboard/sender": "SMTP senders",
   "/dashboard/settings": "Settings",
+  "/dashboard/profile": "Profile",
+  "/dashboard/docs": "Documentation",
 };
 
 export function DashboardHeader({ email }: { email: string }) {
@@ -35,8 +37,8 @@ export function DashboardHeader({ email }: { email: string }) {
           <DropdownMenuLabel><span className="block">Developer account</span><span className="block truncate text-xs font-normal text-muted-foreground">{email}</span></DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem render={<Link href="/dashboard/settings" />}><Settings />Settings</DropdownMenuItem>
-            <DropdownMenuItem render={<Link href="/docs" />}><BookOpen />Documentation</DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/dashboard/profile" />}><Settings />Profile</DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/dashboard/docs" />}><BookOpen />Documentation</DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
