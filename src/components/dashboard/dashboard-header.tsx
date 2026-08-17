@@ -1,6 +1,5 @@
 "use client";
 
-import { BookOpen, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,7 +8,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const pageNames: Record<string, string> = {
@@ -31,17 +29,7 @@ export function DashboardHeader({ email }: { email: string }) {
     </div>
     <div className="flex items-center gap-2">
       <ThemeToggle />
-      <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Open account menu" />}><Avatar><AvatarFallback>{initial}</AvatarFallback></Avatar></DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuLabel><span className="block">Developer account</span><span className="block truncate text-xs font-normal text-muted-foreground">{email}</span></DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem render={<Link href="/dashboard/profile" />}><Settings />Profile</DropdownMenuItem>
-            <DropdownMenuItem render={<Link href="/dashboard/docs" />}><BookOpen />Documentation</DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Button variant="ghost" size="icon" render={<Link href="/dashboard/profile" />} aria-label={`Open profile for ${email}`}><Avatar><AvatarFallback>{initial}</AvatarFallback></Avatar></Button>
     </div>
     <ScrollProgress />
   </header>;
