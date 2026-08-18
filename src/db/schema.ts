@@ -68,6 +68,16 @@ export const emailDelivery = pgTable(
     status: deliveryStatus("status").default("pending").notNull(),
     recipients: jsonb("recipients").$type<string[]>().notNull(),
     subject: text("subject").notNull(),
+    textBody: text("text_body"),
+    htmlBody: text("html_body"),
+    ccRecipients: jsonb("cc_recipients")
+      .$type<string[]>()
+      .default(sql`'[]'::jsonb`)
+      .notNull(),
+    attachmentNames: jsonb("attachment_names")
+      .$type<string[]>()
+      .default(sql`'[]'::jsonb`)
+      .notNull(),
     providerMessageId: text("provider_message_id"),
     acceptedRecipients: jsonb("accepted_recipients")
       .$type<string[]>()

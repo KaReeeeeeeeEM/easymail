@@ -40,6 +40,10 @@ export async function sendOrganizationEmail(input: SendEmailInput, context: { or
     idempotencyKey: context.idempotencyKey,
     recipients,
     subject: input.subject,
+    textBody: input.text,
+    htmlBody: input.html,
+    ccRecipients: input.cc ?? [],
+    attachmentNames: input.attachments?.map((attachment) => attachment.filename) ?? [],
   }).returning({ id: emailDelivery.id });
 
   try {

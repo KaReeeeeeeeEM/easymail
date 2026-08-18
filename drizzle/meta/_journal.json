@@ -71,6 +71,13 @@
       "when": 1787029264375,
       "tag": "0009_flaky_wrecker",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787038958010,
+      "tag": "0010_rainy_expediter",
+      "breakpoints": true
     }
   ]
 }

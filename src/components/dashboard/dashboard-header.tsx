@@ -24,6 +24,7 @@ const pageNames: Record<string, string> = {
   "/dashboard/profile": "Profile",
   "/dashboard/docs": "Documentation",
   "/dashboard/playground": "Playground",
+  "/dashboard/deliveries": "Delivery status",
 };
 
 export function DashboardHeader({
