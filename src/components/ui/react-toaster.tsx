@@ -2,7 +2,6 @@
 
 import {
   CheckCircle2,
-  Clock3,
   Info,
   LoaderCircle,
   XCircle,
@@ -80,13 +79,6 @@ function RichToast({ toast }: { toast: Toast }) {
         <p className="mt-1 text-sm leading-5 text-muted-foreground">
           {feedback(toast)}
         </p>
-        <time className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock3 />
-          {new Date(toast.createdAt).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </time>
       </div>
     </div>
   );
