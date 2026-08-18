@@ -8,6 +8,7 @@ import {
   History,
   LayoutDashboard,
   ShieldCheck,
+  UserRound,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -33,6 +34,7 @@ const items = [
   { href: "/superadmin/reports", label: "Reports", icon: FileBarChart },
   { href: "/superadmin/audit-logs", label: "Audit logs", icon: History },
   { href: "/superadmin/notifications", label: "Notifications", icon: Bell },
+  { href: "/superadmin/profile", label: "Profile", icon: UserRound },
 ];
 
 export function AdminSidebar({ email }: { email: string }) {

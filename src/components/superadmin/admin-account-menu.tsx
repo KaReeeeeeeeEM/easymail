@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Users } from "lucide-react";
+import { LogOut, UserRound, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -67,6 +67,10 @@ export function AdminAccountMenu({
           <span className="block truncate font-normal">{user.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push("/superadmin/profile")}>
+          <UserRound />
+          Profile and security
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push("/superadmin/users")}>
           <Users />
           User management
