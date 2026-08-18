@@ -9,10 +9,7 @@ import { PageOnboarding } from "@/components/dashboard/page-onboarding";
 import { ImpersonationBanner } from "@/components/dashboard/impersonation-banner";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -26,7 +23,10 @@ export default async function DashboardLayout({
   const organizations = await auth.api.listOrganizations({
     headers: await headers(),
   });
-  const completedPages = await db.select({ pageKey: onboardingPageVisit.pageKey }).from(onboardingPageVisit).where(eq(onboardingPageVisit.userId, session.user.id));
+  const completedPages = await db
+    .select({ pageKey: onboardingPageVisit.pageKey })
+    .from(onboardingPageVisit)
+    .where(eq(onboardingPageVisit.userId, session.user.id));
   return (
     <SidebarProvider>
       <AppSidebar
@@ -35,10 +35,20 @@ export default async function DashboardLayout({
         activeOrganizationId={session.session.activeOrganizationId ?? null}
       />
       <SidebarInset className="bg-muted/20">
-        {session.session.impersonatedBy && <ImpersonationBanner email={session.user.email} />}
-        <DashboardHeader email={session.user.email} />
+        {session.session.impersonatedBy && (
+          <ImpersonationBanner email={session.user.email} />
+        )}
+        <DashboardHeader
+          user={{
+            name: session.user.name,
+            email: session.user.email,
+            image: session.user.image,
+          }}
+        />
         <div className="flex-1 p-5 sm:p-8">{children}</div>
-        <PageOnboarding completedPages={completedPages.map((item) => item.pageKey)} />
+        <PageOnboarding
+          completedPages={completedPages.map((item) => item.pageKey)}
+        />
       </SidebarInset>
     </SidebarProvider>
   );
