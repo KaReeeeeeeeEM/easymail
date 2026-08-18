@@ -1,6 +1,15 @@
-![easymail](./easymail-wordmark.png)
+<p align="center">
+  <img src="./easymail-wordmark.png" alt="easymail" width="520" />
+</p>
 
-**A reusable, organization-aware SMTP email API for every application you build.**
+<p align="center"><strong>A reusable, organization-aware SMTP email API for every application you build.</strong></p>
+
+<p align="center">
+  <a href="https://easymail.almareem.com">Website</a> ·
+  <a href="https://easymail.almareem.com/docs">Documentation</a> ·
+  <a href="./CONTRIBUTING.md">Contributing</a> ·
+  <a href="./LICENSE">License</a>
+</p>
 
 EasyMail turns Gmail, Google Workspace, Outlook, or any standards-compliant SMTP account into a stable HTTPS email service. Teams configure and verify senders once, issue rotatable API keys, and send transactional email from any application without rebuilding Nodemailer infrastructure.
 
@@ -194,4 +203,10 @@ The production domain is `https://easymail.almareem.com`.
 
 ## License
 
-Private and proprietary. All rights reserved.
+EasyMail is open-source software available under the [MIT License](./LICENSE).
+
+## Contributing
+
+Contributions are welcome. Fork the repository, create a focused branch, and
+open a pull request against `main`. Read [CONTRIBUTING.md](./CONTRIBUTING.md)
+before starting.
