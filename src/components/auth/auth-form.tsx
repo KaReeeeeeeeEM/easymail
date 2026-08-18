@@ -31,6 +31,13 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const isSignUp = mode === "sign-up";
 
+  async function sendAccountVerificationOtp(email: string) {
+    return authClient.emailOtp.sendVerificationOtp({
+      email,
+      type: "email-verification",
+    });
+  }
+
   async function submit(formData: FormData) {
     setPending(true);
     const email = String(formData.get("email"));
@@ -57,8 +64,8 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       toast.error("Use a valid Gmail address ending in @gmail.com.");
       return;
     }
-    const result = await (
-      isSignUp
+    try {
+      const result = await (isSignUp
         ? authClient.signUp.email({
             email,
             password,
@@ -66,32 +73,62 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             acceptedTerms,
             acceptedPrivacy,
           })
-        : authClient.signIn.email({ email, password })
-    ).finally(() => setPending(false));
-    if (result.error) {
-      const message = result.error.message ?? "Unable to continue";
-      toast.error(message);
-      return;
+        : authClient.signIn.email({ email, password }));
+      if (!isSignUp && result.error?.code === "EMAIL_NOT_VERIFIED") {
+        const normalizedEmail = email.trim().toLowerCase();
+        const otpResult = await sendAccountVerificationOtp(normalizedEmail);
+        if (otpResult.error) {
+          toast.error(
+            otpResult.error.message ??
+              "Your account is not verified and a code could not be sent. Try again shortly.",
+          );
+          return;
+        }
+        toast.success("Verification code sent to your Gmail inbox.");
+        router.push(
+          `/verify-email?email=${encodeURIComponent(normalizedEmail)}`,
+        );
+        return;
+      }
+      if (result.error) {
+        const message = result.error.message ?? "Unable to continue";
+        toast.error(message);
+        return;
+      }
+      if (isSignUp) {
+        const normalizedEmail = email.trim().toLowerCase();
+        const otpResult = await sendAccountVerificationOtp(normalizedEmail);
+        if (otpResult.error) {
+          toast.error(
+            otpResult.error.message ??
+              "Your account was created, but the verification code could not be sent. Use Send a new code on the next screen.",
+          );
+          router.push(
+            `/verify-email?email=${encodeURIComponent(normalizedEmail)}`,
+          );
+          return;
+        }
+        toast.success(
+          "Verification code sent. Check your Gmail inbox to finish creating your account.",
+        );
+        router.push(`/verify-email?email=${encodeURIComponent(normalizedEmail)}`);
+        return;
+      }
+      if (
+        result.data &&
+        "twoFactorRedirect" in result.data &&
+        result.data.twoFactorRedirect
+      ) {
+        router.push("/two-factor");
+        return;
+      }
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      toast.error("Unable to continue. Please try again.");
+    } finally {
+      setPending(false);
     }
-    if (isSignUp) {
-      toast.success(
-        "Verification code sent. Check your Gmail inbox to finish creating your account.",
-      );
-      router.push(
-        `/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`,
-      );
-      return;
-    }
-    if (
-      result.data &&
-      "twoFactorRedirect" in result.data &&
-      result.data.twoFactorRedirect
-    ) {
-      router.push("/two-factor");
-      return;
-    }
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (

@@ -114,12 +114,9 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      const { sendVerificationEmail } =
-        await import("@/features/email/infrastructure/platform-mailer");
-      await sendVerificationEmail({ email: user.email, name: user.name, url });
-    },
+    // Registration uses the emailOTP plugin exclusively. Keeping this false
+    // prevents Better Auth from also starting its link-based verification flow.
+    sendOnSignUp: false,
   },
   rateLimit: {
     enabled: true,
@@ -240,7 +237,9 @@ export const auth = betterAuth({
       allowedAttempts: 5,
       storeOTP: "encrypted",
       resendStrategy: "rotate",
-      sendVerificationOnSignUp: true,
+      // The client requests the OTP after a successful account insert so it can
+      // surface delivery failures and route to the dedicated OTP screen.
+      sendVerificationOnSignUp: false,
       overrideDefaultEmailVerification: true,
       rateLimit: { window: 60, max: 3 },
       sendVerificationOTP: async ({ email, otp, type }) => {
