@@ -1,6 +1,7 @@
 "use client";
 
 import { LogOut, UserRound } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -71,18 +73,20 @@ export function DashboardAccountMenu({
           <span className="block truncate font-normal">{user.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>
-          <UserRound />
-          Profile and security
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          variant="destructive"
-          disabled={pending}
-          onClick={() => void signOut()}
-        >
-          {pending ? <Spinner /> : <LogOut />}
-          {pending ? "Signing out…" : "Log out"}
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem render={<Link href="/dashboard/profile" />}>
+            <UserRound />
+            Profile and security
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            disabled={pending}
+            onClick={() => void signOut()}
+          >
+            {pending ? <Spinner /> : <LogOut />}
+            {pending ? "Signing out…" : "Log out"}
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
