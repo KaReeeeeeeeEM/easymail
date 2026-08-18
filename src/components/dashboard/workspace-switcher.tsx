@@ -68,7 +68,7 @@ export function WorkspaceSwitcher({
           result.error.message ?? "Could not switch workspace.",
         );
       toast.success("Workspace switched.");
-      router.push("/dashboard");
+      router.push(`/dashboard?workspace=${organizationId}`);
       router.refresh();
     } catch {
       toast.error("Could not switch workspace.");
@@ -99,7 +99,7 @@ export function WorkspaceSwitcher({
         return toast.error("Workspace created, but it could not be opened.");
       toast.success("Workspace created successfully.");
       setCreateOpen(false);
-      router.push("/dashboard");
+      router.push(`/dashboard?workspace=${result.data.id}`);
       router.refresh();
     } catch {
       toast.error("Could not create workspace.");

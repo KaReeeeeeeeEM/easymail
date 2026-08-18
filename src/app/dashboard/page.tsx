@@ -7,6 +7,10 @@ import { StatusChart } from "@/components/dashboard/status-chart";
 import { PageHeading } from "@/components/dashboard/page-heading";
 import { RecentRequestsTable } from "@/components/dashboard/recent-requests-table";
 import { WorkspaceSetup } from "@/components/dashboard/workspace-setup";
+import {
+  ActivateWorkspace,
+  WorkspaceCards,
+} from "@/components/dashboard/workspace-overview";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,20 +22,51 @@ import {
 import { getDashboardData } from "@/features/dashboard/queries/get-dashboard-data";
 import { auth } from "@/lib/auth";
 
-export default async function DashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  const organizationId = session?.session.activeOrganizationId;
-  if (!organizationId)
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ workspace?: string }>;
+}) {
+  const requestHeaders = await headers();
+  const [session, organizations, params] = await Promise.all([
+    auth.api.getSession({ headers: requestHeaders }),
+    auth.api.listOrganizations({ headers: requestHeaders }),
+    searchParams,
+  ]);
+  const activeOrganizationId = session?.session.activeOrganizationId ?? null;
+  const requestedOrganization = organizations.find(
+    (organization) => organization.id === params.workspace,
+  );
+
+  if (organizations.length === 0)
     return (
       <div className="flex flex-col gap-8">
         <PageHeading
           eyebrow="Workspace overview"
           title="Delivery overview"
-          description="Choose a workspace to monitor email delivery, API usage, and sender health."
+          description="Create a workspace to monitor email delivery, API usage, and sender health."
         />
         <WorkspaceSetup />
       </div>
     );
+
+  if (organizations.length > 1 && !requestedOrganization)
+    return (
+      <div className="flex flex-col gap-8">
+        <PageHeading
+          eyebrow="Your workspaces"
+          title="Choose a workspace"
+          description="Select the workspace whose delivery activity, senders, and API usage you want to view."
+        />
+        <WorkspaceCards
+          organizations={organizations}
+          activeOrganizationId={activeOrganizationId}
+        />
+      </div>
+    );
+
+  const selectedOrganization = requestedOrganization ?? organizations[0];
+  const organizationId = selectedOrganization.id;
   const data = await getDashboardData(organizationId);
   const cards = [
     {
@@ -61,10 +96,13 @@ export default async function DashboardPage() {
   ];
   return (
     <div className="flex flex-col gap-8">
+      {organizationId !== activeOrganizationId && (
+        <ActivateWorkspace organization={selectedOrganization} />
+      )}
       <PageHeading
         eyebrow="Workspace active"
         title="Delivery overview"
-        description="Monitor SMTP activity, provider acceptance, and recent API requests."
+        description={`Monitor SMTP activity, provider acceptance, and recent API requests for ${selectedOrganization.name}.`}
         action={
           <Button render={<Link href="/dashboard/sender#add-sender" />}>
             <Plus data-icon="inline-start" />
