@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Code2, FlaskConical } from "lucide-react";
+import { Code2, FlaskConical, KeyRound, Send } from "lucide-react";
 
 import { CopyCodeButton } from "@/components/copy-code-button";
 import { PlaygroundForm, type PlaygroundValues } from "@/components/dashboard/playground-form";
 import { LiveSyntaxCodeBlock } from "@/components/live-syntax-code-block";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -93,18 +94,28 @@ export function PlaygroundExperience({ senders }: { senders: Sender[] }) {
   const samples = useMemo(() => buildSamples(values), [values]);
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-      <Card>
+    <div className="flex flex-col gap-6">
+      <Alert>
+        <Send />
+        <AlertTitle>Choose the right sending method</AlertTitle>
+        <AlertDescription>
+          Sending with the form below only requires a saved sender. Sending from
+          your application requires a saved sender plus an API key bound to that
+          sender; the code sample uses the key and resolves its sender automatically.
+        </AlertDescription>
+      </Alert>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><FlaskConical />Send a test email</CardTitle>
-          <CardDescription>Choose a saved sender. Its encrypted SMTP credentials never leave the server.</CardDescription>
+          <CardDescription><Send className="mr-1 inline size-4" />Platform send: choose a saved sender. No API key is required here, and its encrypted SMTP credentials never leave the server.</CardDescription>
         </CardHeader>
         <CardContent><PlaygroundForm senders={senders} values={values} onValuesChange={setValues} /></CardContent>
-      </Card>
-      <Card className="min-w-0">
+        </Card>
+        <Card className="min-w-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Code2 />Request examples</CardTitle>
-          <CardDescription>These samples update as you type and can run unchanged in terminals, Postman, and other HTTP clients. Add a concrete idempotency key only when your application retries requests.</CardDescription>
+          <CardDescription><KeyRound className="mr-1 inline size-4" />Programmatic send: create an API key for the sender first, export it as EASYMAIL_API_KEY, then run the sample. Add a concrete idempotency key only when your application retries requests.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="curl">
@@ -119,7 +130,8 @@ export function PlaygroundExperience({ senders }: { senders: Sender[] }) {
             ))}
           </Tabs>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

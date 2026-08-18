@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Plus, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, Plus, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { configureSmtp } from "@/features/email/application/configure-smtp";
@@ -125,6 +125,9 @@ export function SmtpConfigurationForm({
                   placeholder="Acme Support"
                   required
                 />
+                <FieldDescription>
+                  The name recipients see in their inbox, such as Acme Support.
+                </FieldDescription>
               </Field>
               <Field>
                 <FieldLabel htmlFor="senderEmail">From email</FieldLabel>
@@ -249,9 +252,28 @@ export function SmtpConfigurationForm({
                   id="password"
                   name="password"
                   autoComplete="new-password"
-                  placeholder="App password or SMTP password"
+                  placeholder={hostChoice === "smtp.gmail.com" ? "16-character Google App Password" : "App password or SMTP password"}
                   required
                 />
+                {hostChoice === "smtp.gmail.com" ? (
+                  <FieldDescription>
+                    Do not use your normal Google password. Enable 2-Step Verification, then{" "}
+                    <a
+                      href="https://myaccount.google.com/apppasswords"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-primary underline underline-offset-4"
+                    >
+                      create a 16-character Google App Password
+                      <ExternalLink className="ml-1 inline size-3" aria-hidden="true" />
+                    </a>
+                    .
+                  </FieldDescription>
+                ) : (
+                  <FieldDescription>
+                    Use the app password or SMTP credential issued by your provider.
+                  </FieldDescription>
+                )}
               </Field>
               <label className="flex items-center gap-2 text-sm">
                 <input

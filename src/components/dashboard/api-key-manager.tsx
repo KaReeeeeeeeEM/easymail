@@ -23,7 +23,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -167,7 +172,7 @@ export function ApiKeyManager({
       <PageHeading
         eyebrow="Developer access"
         title="API keys"
-        description="Create, search, rotate, and revoke the credentials your applications use."
+        description="Create a key and bind it to a saved sender. Your application needs that sender-bound key to send email programmatically."
         action={
           <Button
             onClick={() => setCreateOpen(true)}
@@ -186,8 +191,8 @@ export function ApiKeyManager({
           <DialogHeader>
             <DialogTitle>Create API key</DialogTitle>
             <DialogDescription>
-              The secret is shown once. Store it in your application&apos;s
-              secret manager.
+              Choose the sender this key may use. The secret is shown once, so
+              store it in your application&apos;s secret manager.
             </DialogDescription>
           </DialogHeader>
           <form
@@ -222,6 +227,10 @@ export function ApiKeyManager({
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FieldDescription>
+                  The key is permanently associated with this sender. Your API
+                  request supplies the key; the platform resolves the sender securely.
+                </FieldDescription>
               </Field>
               <DialogFooter>
                 <Button type="submit" disabled={Boolean(pendingAction)}>

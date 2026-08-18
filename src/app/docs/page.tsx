@@ -214,11 +214,25 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
             </div>
             <Alert className="mt-6">
               <Info />
+              <AlertTitle>Two ways to send</AlertTitle>
+              <AlertDescription>
+                In the dashboard playground, select a saved sender and send—no
+                API key is needed. From code, first create an API key bound to
+                that sender, then authenticate the request with the key. The
+                sender name is not repeated in the payload because the binding
+                is stored securely with the key.
+              </AlertDescription>
+            </Alert>
+            <Alert className="mt-4">
+              <ShieldCheck />
               <AlertTitle>Google app passwords</AlertTitle>
               <AlertDescription>
-                Your Google account must have two-step verification enabled
-                before Google exposes app passwords. Never enter your normal
-                Google password into easymail.
+                Your Google account must have two-step verification enabled.
+                Never enter your normal Google password. Open{" "}
+                <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer">
+                  Google App Passwords
+                </a>{" "}
+                and create the 16-character password used by the sender configuration.
               </AlertDescription>
             </Alert>
           </section>
@@ -241,7 +255,7 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
             <SectionHeading
               kicker="Identity"
               title="Authentication"
-              description="Every email request requires an organization-owned API key associated with one SMTP sender. Dashboard session cookies are never accepted by the public email endpoint."
+              description="Programmatic sending requires two setup items: a verified SMTP sender and an organization-owned API key bound to that sender. Your request sends the key, and the platform securely resolves the sender. Dashboard playground sends only require selecting the saved sender."
             />
             <SyntaxCodeBlock
               code={`Authorization: Bearer $EASYMAIL_API_KEY`}
