@@ -41,7 +41,15 @@ function statusLabel(status: Delivery["status"]) {
 
 function StatusBadge({ status }: { status: Delivery["status"] }) {
   return (
-    <Badge variant={status === "failed" ? "destructive" : status === "sent" ? "secondary" : "outline"}>
+    <Badge
+      variant={
+        status === "failed"
+          ? "destructive"
+          : status === "sent"
+            ? "success"
+            : "warning"
+      }
+    >
       {statusLabel(status)}
     </Badge>
   );
