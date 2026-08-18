@@ -1,28 +1,75 @@
-import { count } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { organization, user } from "@/db/auth-schema";
-import { emailDelivery, generatedReport, smtpConfiguration } from "@/db/schema";
+import { generatedReport } from "@/db/schema";
 import { recordAuditLog } from "@/lib/audit";
 import { auth } from "@/lib/auth";
+import {
+  createReportSnapshot,
+  reportFormats,
+  reportTitles,
+  reportTypes,
+} from "@/lib/report-snapshots";
 
-const schema = z.object({ type: z.enum(["delivery", "users", "workspaces", "senders"]) });
-const titles = { delivery: "Email delivery report", users: "User adoption report", workspaces: "Workspace inventory report", senders: "SMTP sender report" } as const;
+const schema = z.object({
+  type: z.enum(reportTypes),
+  format: z.enum(reportFormats),
+});
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user || session.user.role !== "SUPER_ADMIN") return NextResponse.json({ error: { message: "Forbidden" } }, { status: 403 });
+  if (!session?.user || session.user.role !== "SUPER_ADMIN")
+    return NextResponse.json(
+      { error: { message: "Forbidden" } },
+      { status: 403 },
+    );
   try {
-    const { type } = schema.parse(await request.json());
-    const table = type === "delivery" ? emailDelivery : type === "users" ? user : type === "workspaces" ? organization : smtpConfiguration;
-    const [result] = await db.select({ value: count() }).from(table);
-    const [report] = await db.insert(generatedReport).values({ type, title: titles[type], rowCount: result.value, generatedBy: session.user.id, generatedByEmail: session.user.email }).returning();
-    await recordAuditLog({ action: "REPORT_GENERATED", entity: "report", entityId: report.id, description: `Generated ${titles[type]}.`, actorId: session.user.id, actorEmail: session.user.email, metadata: { type, rowCount: result.value } });
-    return NextResponse.json({ data: report }, { status: 201 });
+    const { type, format } = schema.parse(await request.json());
+    const data = await createReportSnapshot(type);
+    const [report] = await db
+      .insert(generatedReport)
+      .values({
+        type,
+        format,
+        title: reportTitles[type],
+        rowCount: data.length,
+        data,
+        generatedBy: session.user.id,
+        generatedByEmail: session.user.email,
+      })
+      .returning();
+    await recordAuditLog({
+      action: "REPORT_GENERATED",
+      entity: "report",
+      entityId: report.id,
+      description: `Generated ${reportTitles[type]} as ${format.toUpperCase()}.`,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      metadata: { type, format, rowCount: data.length },
+    });
+    return NextResponse.json(
+      {
+        data: {
+          ...report,
+          data: undefined,
+          downloadUrl: `/api/superadmin/reports/${report.id}/download`,
+        },
+      },
+      { status: 201 },
+    );
   } catch (error) {
-    return NextResponse.json({ error: { message: error instanceof Error ? error.message : "Report generation failed." } }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: {
+          message:
+            error instanceof Error
+              ? error.message
+              : "Report generation failed.",
+        },
+      },
+      { status: 400 },
+    );
   }
 }

@@ -128,6 +128,10 @@ export const generatedReport = pgTable(
     status: text("status").default("ready").notNull(),
     format: text("format").default("csv").notNull(),
     rowCount: integer("row_count").default(0).notNull(),
+    data: jsonb("data")
+      .$type<Array<Record<string, string | number | boolean | null>>>()
+      .default(sql`'[]'::jsonb`)
+      .notNull(),
     generatedBy: text("generated_by")
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),

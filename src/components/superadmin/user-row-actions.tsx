@@ -4,6 +4,7 @@ import { EllipsisVertical, Eye, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { DetailTable } from "@/components/detail-table";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -74,17 +76,19 @@ export function UserRowActions({
           <EllipsisVertical />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Eye />
-            View user
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={isAdmin || pending}
-            onClick={() => void manage()}
-          >
-            {pending ? <Spinner /> : <LogIn />}
-            {pending ? "Opening…" : "Manage as user"}
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setOpen(true)}>
+              <Eye />
+              View user
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isAdmin || pending}
+              onClick={() => void manage()}
+            >
+              {pending ? <Spinner /> : <LogIn />}
+              {pending ? "Opening…" : "Manage as user"}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -103,40 +107,23 @@ export function UserRowActions({
               <TabsTrigger value="security">Security</TabsTrigger>
             </TabsList>
             <TabsContent value="overview">
-              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                {[
-                  ["Email", item.email],
-                  ["Role", item.role],
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="rounded-lg border bg-muted/30 p-4"
-                  >
-                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {label}
-                    </dt>
-                    <dd className="mt-1 font-medium">{value}</dd>
-                  </div>
-                ))}
-              </dl>
+              <DetailTable
+                rows={[
+                  { label: "Email", value: item.email },
+                  { label: "Role", value: item.role },
+                ]}
+              />
             </TabsContent>
             <TabsContent value="security">
-              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                {[
-                  ["Email status", item.emailVerified ? "Verified" : "Pending"],
-                  ["Joined", item.createdAt.toLocaleString()],
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="rounded-lg border bg-muted/30 p-4"
-                  >
-                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {label}
-                    </dt>
-                    <dd className="mt-1 font-medium">{value}</dd>
-                  </div>
-                ))}
-              </dl>
+              <DetailTable
+                rows={[
+                  {
+                    label: "Email status",
+                    value: item.emailVerified ? "Verified" : "Pending",
+                  },
+                  { label: "Joined", value: item.createdAt.toLocaleString() },
+                ]}
+              />
             </TabsContent>
           </Tabs>
         </DialogContent>

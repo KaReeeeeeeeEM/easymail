@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye } from "lucide-react";
+import { DetailTable } from "@/components/detail-table";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -46,52 +47,45 @@ export function SenderDetailsDialog({ sender }: { sender: Sender }) {
             value="overview"
             className="animate-in fade-in duration-200"
           >
-            <dl className="grid gap-4 py-4">
-              <Detail
-                label="Sender"
-                value={`${sender.senderName} <${sender.senderEmail}>`}
-              />
-              <Detail
-                label="Status"
-                value={sender.isDefault ? "Default sender" : "Active sender"}
-              />
-              <Detail
-                label="Last verified"
-                value={
-                  sender.lastVerifiedAt
+            <DetailTable
+              rows={[
+                {
+                  label: "Sender",
+                  value: `${sender.senderName} <${sender.senderEmail}>`,
+                },
+                {
+                  label: "Status",
+                  value: sender.isDefault ? "Default sender" : "Active sender",
+                },
+                {
+                  label: "Last verified",
+                  value: sender.lastVerifiedAt
                     ? new Date(sender.lastVerifiedAt).toLocaleString("en", {
                         dateStyle: "medium",
                         timeStyle: "short",
                       })
-                    : "Not recorded"
-                }
-              />
-            </dl>
+                    : "Not recorded",
+                },
+              ]}
+            />
           </TabsContent>
           <TabsContent
             value="connection"
             className="animate-in fade-in duration-200"
           >
-            <dl className="grid gap-4 py-4">
-              <Detail label="Host" value={sender.host} />
-              <Detail label="Port" value={String(sender.port)} />
-              <Detail
-                label="Security"
-                value={sender.secure ? "SSL/TLS" : "STARTTLS"}
-              />
-            </dl>
+            <DetailTable
+              rows={[
+                { label: "Host", value: sender.host },
+                { label: "Port", value: String(sender.port) },
+                {
+                  label: "Security",
+                  value: sender.secure ? "SSL/TLS" : "STARTTLS",
+                },
+              ]}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex min-w-0 items-center justify-between gap-4 border-b pb-3">
-      <dt className="shrink-0 text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 break-all text-right font-medium">{value}</dd>
-    </div>
   );
 }

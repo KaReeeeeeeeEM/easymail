@@ -1,9 +1,10 @@
 "use client";
 
-import { Clipboard, EllipsisVertical, Eye } from "lucide-react";
+import { Clipboard, Download, EllipsisVertical, Eye } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { DetailTable } from "@/components/detail-table";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -25,11 +27,13 @@ export function RowActionMenu({
   title,
   description,
   fields,
+  downloadUrl,
 }: {
   id: string;
   title: string;
   description: string;
   fields: DetailField[];
+  downloadUrl?: string;
 }) {
   const [open, setOpen] = useState(false);
   async function copyId() {
@@ -55,14 +59,22 @@ export function RowActionMenu({
           <EllipsisVertical />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
-          <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Eye />
-            View details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => void copyId()}>
-            <Clipboard />
-            Copy ID
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setOpen(true)}>
+              <Eye />
+              View details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => void copyId()}>
+              <Clipboard />
+              Copy ID
+            </DropdownMenuItem>
+            {downloadUrl ? (
+              <DropdownMenuItem render={<a href={downloadUrl} download />}>
+                <Download />
+                Download
+              </DropdownMenuItem>
+            ) : null}
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -79,38 +91,12 @@ export function RowActionMenu({
               <TabsTrigger value="metadata">Metadata</TabsTrigger>
             </TabsList>
             <TabsContent value="overview">
-              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                {fields.slice(0, Math.ceil(fields.length / 2)).map((field) => (
-                  <div
-                    key={field.label}
-                    className="rounded-lg border bg-muted/30 p-4"
-                  >
-                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {field.label}
-                    </dt>
-                    <dd className="mt-1 break-words font-medium">
-                      {field.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+              <DetailTable
+                rows={fields.slice(0, Math.ceil(fields.length / 2))}
+              />
             </TabsContent>
             <TabsContent value="metadata">
-              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                {fields.slice(Math.ceil(fields.length / 2)).map((field) => (
-                  <div
-                    key={field.label}
-                    className="rounded-lg border bg-muted/30 p-4"
-                  >
-                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {field.label}
-                    </dt>
-                    <dd className="mt-1 break-words font-medium">
-                      {field.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+              <DetailTable rows={fields.slice(Math.ceil(fields.length / 2))} />
             </TabsContent>
           </Tabs>
         </DialogContent>

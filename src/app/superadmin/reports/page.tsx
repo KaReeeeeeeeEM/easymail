@@ -38,7 +38,16 @@ export default async function ReportsPage() {
         .where(eq(emailDelivery.status, "failed")),
       db.select({ value: count() }).from(smtpConfiguration),
       db
-        .select()
+        .select({
+          id: generatedReport.id,
+          type: generatedReport.type,
+          title: generatedReport.title,
+          status: generatedReport.status,
+          format: generatedReport.format,
+          rowCount: generatedReport.rowCount,
+          generatedByEmail: generatedReport.generatedByEmail,
+          createdAt: generatedReport.createdAt,
+        })
         .from(generatedReport)
         .orderBy(desc(generatedReport.createdAt))
         .limit(100),
@@ -222,6 +231,7 @@ export default async function ReportsPage() {
                               },
                               { label: "Status", value: report.status },
                             ]}
+                            downloadUrl={`/api/superadmin/reports/${report.id}/download`}
                           />
                         </TableCell>
                       </TableRow>
