@@ -159,21 +159,6 @@ export const auth = betterAuth({
     }),
     after: createAuthMiddleware(async (context) => {
       const session = context.context.session;
-      if (context.path === "/admin/impersonate-user" && session?.user) {
-        const targetUserId = (context.body as { userId?: string } | undefined)
-          ?.userId;
-        const { recordAuditLog } = await import("@/lib/audit");
-        await recordAuditLog({
-          action: "USER_IMPERSONATION_STARTED",
-          entity: "user",
-          entityId: targetUserId,
-          description:
-            "Super administrator entered a user session for delegated support.",
-          actorId: session.user.id,
-          actorEmail: session.user.email,
-          metadata: { targetUserId },
-        });
-      }
       if (context.path === "/two-factor/verify-otp" && session?.user) {
         const { recordAuditLog } = await import("@/lib/audit");
         await recordAuditLog({
@@ -240,7 +225,6 @@ export const auth = betterAuth({
       ac: adminAccess,
       roles: adminRoles,
       defaultRole: "USER",
-      impersonationSessionDuration: 60 * 30,
     }),
     passkey({
       rpName: "easymail",

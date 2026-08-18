@@ -6,7 +6,6 @@ import { db } from "@/db";
 import { onboardingPageVisit } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { PageOnboarding } from "@/components/dashboard/page-onboarding";
-import { ImpersonationBanner } from "@/components/dashboard/impersonation-banner";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -35,9 +34,6 @@ export default async function DashboardLayout({
         activeOrganizationId={session.session.activeOrganizationId ?? null}
       />
       <SidebarInset className="bg-muted/20">
-        {session.session.impersonatedBy && (
-          <ImpersonationBanner email={session.user.email} />
-        )}
         <DashboardHeader
           user={{
             name: session.user.name,

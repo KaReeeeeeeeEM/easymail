@@ -36,8 +36,8 @@ export default async function UsersPage() {
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">Users</h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
-            Create managed accounts, review security status, or enter a customer
-            session to operate the product on their behalf.
+            Create managed accounts, review security status, and control access
+            without entering or exposing a user&apos;s private workspace.
           </p>
         </div>
         <CreateUserDialog />
@@ -89,6 +89,9 @@ export default async function UsersPage() {
                       </Badge>
                       {item.mustChangePassword && (
                         <Badge variant="outline">Temporary password</Badge>
+                      )}
+                      {item.banned && (
+                        <Badge variant="destructive">Restricted</Badge>
                       )}
                     </div>
                   </TableCell>

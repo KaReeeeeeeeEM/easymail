@@ -80,6 +80,7 @@ export function AppSidebar({
               {items.map(({ href, label, icon: Icon }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton
+                    data-onboarding={`nav-${label.toLowerCase().replaceAll(" ", "-")}`}
                     render={<Link href={href} />}
                     tooltip={label}
                     isActive={pathname === href}
@@ -98,6 +99,7 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
+              data-onboarding="nav-settings"
               render={<Link href="/dashboard/settings" />}
               tooltip="Settings"
               isActive={pathname === "/dashboard/settings"}

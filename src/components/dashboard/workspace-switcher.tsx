@@ -116,6 +116,7 @@ export function WorkspaceSwitcher({
             <DropdownMenuTrigger
               render={
                 <SidebarMenuButton
+                  data-onboarding="workspace-switcher"
                   size="lg"
                   tooltip={active?.name ?? "Select workspace"}
                   className="group-data-[collapsible=icon]:justify-center"
