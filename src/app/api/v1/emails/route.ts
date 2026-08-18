@@ -35,10 +35,22 @@ export async function POST(request: Request) {
 
   const idempotencyKey = request.headers.get("idempotency-key")?.trim();
   if (idempotencyKey && idempotencyKey.length > 200) return errorResponse(422, "INVALID_IDEMPOTENCY_KEY", "Idempotency-Key must not exceed 200 characters", requestId);
+  if (idempotencyKey && (/\$\([^)]+\)/.test(idempotencyKey) || /\{\{[^}]+\}\}/.test(idempotencyKey))) {
+    return errorResponse(422, "INVALID_IDEMPOTENCY_KEY", "Resolve the Idempotency-Key placeholder before sending. Use a new concrete value for every new email.", requestId);
+  }
 
   try {
     const result = await sendOrganizationEmail({ ...parsed.data, senderId }, { organizationId: verification.key.referenceId, idempotencyKey });
-    return Response.json({ data: result, requestId }, { status: result.duplicate ? 200 : 201, headers: { "x-request-id": requestId } });
+    return Response.json(
+      { data: result, requestId },
+      {
+        status: result.duplicate ? 200 : 201,
+        headers: {
+          "x-request-id": requestId,
+          "idempotency-replayed": String(result.duplicate),
+        },
+      },
+    );
   } catch (error) {
     if (error instanceof EmailServiceError) {
       const status = error.code === "SMTP_NOT_CONFIGURED" ? 409 : 502;

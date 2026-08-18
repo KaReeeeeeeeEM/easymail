@@ -49,7 +49,6 @@ function buildSamples(values: PlaygroundValues): Record<Language, string> {
     curl: `curl --request POST '${endpoint}' \\
   --header "Authorization: Bearer $EASYMAIL_API_KEY" \\
   --header 'Content-Type: application/json' \\
-  --header "Idempotency-Key: $(uuidgen)" \\
   --data-raw '${curlJson}'`,
     javascript: `${jsSetup}const response = await fetch("${endpoint}", {
   method: "POST",
@@ -105,14 +104,16 @@ export function PlaygroundExperience({ senders }: { senders: Sender[] }) {
       <Card className="min-w-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Code2 />Request examples</CardTitle>
-          <CardDescription>These samples update as you type. Export your API key, copy a sample, and run it directly.</CardDescription>
+          <CardDescription>These samples update as you type and can run unchanged in terminals, Postman, and other HTTP clients. Add a concrete idempotency key only when your application retries requests.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="curl">
             <TabsList variant="line"><TabsTrigger value="curl">cURL</TabsTrigger><TabsTrigger value="javascript">JavaScript</TabsTrigger><TabsTrigger value="python">Python</TabsTrigger></TabsList>
             {(Object.keys(samples) as Language[]).map((language) => (
               <TabsContent key={language} value={language} className="animate-in fade-in duration-200">
-                <div className="flex justify-end pt-4"><CopyCodeButton code={samples[language]} /></div>
+                <div className="flex justify-end pt-4">
+                  <CopyCodeButton code={samples[language]} />
+                </div>
                 <LiveSyntaxCodeBlock className="mt-3" code={samples[language]} language={language === "curl" ? "bash" : language} />
               </TabsContent>
             ))}
