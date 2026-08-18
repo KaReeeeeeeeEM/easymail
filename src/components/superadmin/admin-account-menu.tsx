@@ -64,10 +64,12 @@ export function AdminAccountMenu({
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel>
-          <span className="block text-sm text-foreground">{user.name}</span>
-          <span className="block truncate font-normal">{user.email}</span>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <span className="block text-sm text-foreground">{user.name}</span>
+            <span className="block truncate font-normal">{user.email}</span>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem render={<Link href="/superadmin/profile" />}>
