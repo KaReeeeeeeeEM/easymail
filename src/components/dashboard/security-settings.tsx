@@ -22,6 +22,10 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  DeleteConfirmDialog,
+  UpdateConfirmDialog,
+} from "@/components/confirm-action-dialog";
 
 type Passkey = {
   id: string;
@@ -35,6 +39,9 @@ export function SecuritySettings() {
   const [newPassword, setNewPassword] = useState("");
   const [passkeyPending, setPasskeyPending] = useState<string | null>(null);
   const [passkeys, setPasskeys] = useState<Passkey[]>([]);
+  const [deletePasskeyTarget, setDeletePasskeyTarget] =
+    useState<Passkey | null>(null);
+  const [passwordForm, setPasswordForm] = useState<FormData | null>(null);
   async function loadPasskeys() {
     const result = await authClient.passkey.listUserPasskeys();
     if (result.data) setPasskeys(result.data as Passkey[]);
@@ -117,7 +124,12 @@ export function SecuritySettings() {
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              void changePassword(new FormData(event.currentTarget));
+              const formData = new FormData(event.currentTarget);
+              if (!meetsPasswordRequirements(newPassword))
+                return toast.error("Please meet every password requirement.");
+              if (newPassword !== String(formData.get("confirmation")))
+                return toast.error("Passwords do not match.");
+              setPasswordForm(formData);
             }}
           >
             <FieldGroup>
@@ -159,8 +171,16 @@ export function SecuritySettings() {
                   required
                 />
               </Field>
-              <Button type="submit" disabled={passwordPending} aria-busy={passwordPending}>
-                {passwordPending ? <Spinner data-icon="inline-start" /> : <KeyRound data-icon="inline-start" />}
+              <Button
+                type="submit"
+                disabled={passwordPending}
+                aria-busy={passwordPending}
+              >
+                {passwordPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <KeyRound data-icon="inline-start" />
+                )}
                 {passwordPending ? "Changing password…" : "Change password"}
               </Button>
             </FieldGroup>
@@ -194,9 +214,19 @@ export function SecuritySettings() {
                   placeholder="My MacBook Touch ID"
                 />
               </Field>
-              <Button type="submit" disabled={Boolean(passkeyPending)} aria-busy={passkeyPending === "setup"}>
-                {passkeyPending === "setup" ? <Spinner data-icon="inline-start" /> : <Fingerprint data-icon="inline-start" />}
-                {passkeyPending === "setup" ? "Waiting for device…" : "Set up biometrics"}
+              <Button
+                type="submit"
+                disabled={Boolean(passkeyPending)}
+                aria-busy={passkeyPending === "setup"}
+              >
+                {passkeyPending === "setup" ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <Fingerprint data-icon="inline-start" />
+                )}
+                {passkeyPending === "setup"
+                  ? "Waiting for device…"
+                  : "Set up biometrics"}
               </Button>
             </FieldGroup>
           </form>
@@ -220,11 +250,15 @@ export function SecuritySettings() {
                     variant="ghost"
                     size="icon-sm"
                     disabled={Boolean(passkeyPending)}
-                    onClick={() => void removePasskey(passkey.id)}
+                    onClick={() => setDeletePasskeyTarget(passkey)}
                     aria-label="Remove passkey"
                     aria-busy={passkeyPending === `remove:${passkey.id}`}
                   >
-                    {passkeyPending === `remove:${passkey.id}` ? <Spinner /> : <Trash2 />}
+                    {passkeyPending === `remove:${passkey.id}` ? (
+                      <Spinner />
+                    ) : (
+                      <Trash2 />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -237,6 +271,31 @@ export function SecuritySettings() {
           </div>
         </CardContent>
       </Card>
+      <UpdateConfirmDialog
+        open={Boolean(passwordForm)}
+        onOpenChange={(open) => !open && setPasswordForm(null)}
+        entityName="your password"
+        pending={passwordPending}
+        onConfirm={async () => {
+          if (!passwordForm) return;
+          await changePassword(passwordForm);
+          setPasswordForm(null);
+        }}
+      />
+      <DeleteConfirmDialog
+        open={Boolean(deletePasskeyTarget)}
+        onOpenChange={(open) => !open && setDeletePasskeyTarget(null)}
+        entityName={deletePasskeyTarget?.name || "Biometric passkey"}
+        pending={Boolean(
+          deletePasskeyTarget &&
+          passkeyPending === `remove:${deletePasskeyTarget.id}`,
+        )}
+        onConfirm={async () => {
+          if (!deletePasskeyTarget) return;
+          await removePasskey(deletePasskeyTarget.id);
+          setDeletePasskeyTarget(null);
+        }}
+      />
     </div>
   );
 }

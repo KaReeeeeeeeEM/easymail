@@ -34,9 +34,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import { PageHeading } from "@/components/dashboard/page-heading";
+import {
+  DeleteConfirmDialog,
+  UpdateConfirmDialog,
+} from "@/components/confirm-action-dialog";
 
 type KeySummary = {
   id: string;
@@ -63,6 +74,8 @@ export function ApiKeyManager({
   const [secret, setSecret] = useState<string | null>(null);
   const [copyPending, setCopyPending] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<KeySummary | null>(null);
+  const [rotateTarget, setRotateTarget] = useState<KeySummary | null>(null);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 8;
@@ -156,7 +169,10 @@ export function ApiKeyManager({
         title="API keys"
         description="Create, search, rotate, and revoke the credentials your applications use."
         action={
-          <Button onClick={() => setCreateOpen(true)} disabled={!senders.length}>
+          <Button
+            onClick={() => setCreateOpen(true)}
+            disabled={!senders.length}
+          >
             <Plus data-icon="inline-start" />
             Create key
           </Button>
@@ -209,7 +225,11 @@ export function ApiKeyManager({
               </Field>
               <DialogFooter>
                 <Button type="submit" disabled={Boolean(pendingAction)}>
-                  {pendingAction === "create" ? <Spinner data-icon="inline-start" /> : <KeyRound data-icon="inline-start" />}
+                  {pendingAction === "create" ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <KeyRound data-icon="inline-start" />
+                  )}
                   {pendingAction === "create" ? "Creating key…" : "Create key"}
                 </Button>
               </DialogFooter>
@@ -258,7 +278,9 @@ export function ApiKeyManager({
                     {key.start ?? "gms_••••••••"}
                   </TableCell>
                   <TableCell>
-                    {senders.find((sender) => sender.id === key.metadata?.senderId)?.label ?? "Unassigned"}
+                    {senders.find(
+                      (sender) => sender.id === key.metadata?.senderId,
+                    )?.label ?? "Unassigned"}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">Active</Badge>
@@ -268,7 +290,7 @@ export function ApiKeyManager({
                       variant="outline"
                       size="sm"
                       disabled={Boolean(pendingAction) || !senders.length}
-                      onClick={() => rotate(key)}
+                      onClick={() => setRotateTarget(key)}
                     >
                       {pendingAction === `rotate:${key.id}` ? (
                         <Spinner data-icon="inline-start" />
@@ -283,7 +305,7 @@ export function ApiKeyManager({
                       variant="destructive"
                       size="sm"
                       disabled={Boolean(pendingAction)}
-                      onClick={() => remove(key.id)}
+                      onClick={() => setDeleteTarget(key)}
                       aria-label={`Revoke ${key.name}`}
                     >
                       {pendingAction === `remove:${key.id}` ? (
@@ -350,12 +372,42 @@ export function ApiKeyManager({
                 }
               }}
             >
-              {copyPending ? <Spinner data-icon="inline-start" /> : <Copy data-icon="inline-start" />}
+              {copyPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Copy data-icon="inline-start" />
+              )}
               {copyPending ? "Copying key…" : "Copy key"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <UpdateConfirmDialog
+        open={Boolean(rotateTarget)}
+        onOpenChange={(open) => !open && setRotateTarget(null)}
+        entityName={rotateTarget?.name ?? "this API key"}
+        pending={Boolean(
+          rotateTarget && pendingAction === `rotate:${rotateTarget.id}`,
+        )}
+        onConfirm={async () => {
+          if (!rotateTarget) return;
+          await rotate(rotateTarget);
+          setRotateTarget(null);
+        }}
+      />
+      <DeleteConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        entityName={deleteTarget?.name ?? "API key"}
+        pending={Boolean(
+          deleteTarget && pendingAction === `remove:${deleteTarget.id}`,
+        )}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          await remove(deleteTarget.id);
+          setDeleteTarget(null);
+        }}
+      />
     </div>
   );
 }

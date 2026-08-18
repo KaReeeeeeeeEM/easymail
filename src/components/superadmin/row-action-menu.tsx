@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type DetailField = { label: string; value: React.ReactNode };
 export function RowActionMenu({
@@ -67,22 +68,51 @@ export function RowActionMenu({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle className="font-bold text-primary">
+              {title}
+            </DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
-          <dl className="grid gap-3 border-t pt-4 sm:grid-cols-2">
-            {fields.map((field) => (
-              <div
-                key={field.label}
-                className="rounded-lg border bg-muted/30 p-4"
-              >
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {field.label}
-                </dt>
-                <dd className="mt-1 break-words font-medium">{field.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <Tabs defaultValue="overview">
+            <TabsList variant="line">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="metadata">Metadata</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview">
+              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                {fields.slice(0, Math.ceil(fields.length / 2)).map((field) => (
+                  <div
+                    key={field.label}
+                    className="rounded-lg border bg-muted/30 p-4"
+                  >
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {field.label}
+                    </dt>
+                    <dd className="mt-1 break-words font-medium">
+                      {field.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </TabsContent>
+            <TabsContent value="metadata">
+              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                {fields.slice(Math.ceil(fields.length / 2)).map((field) => (
+                  <div
+                    key={field.label}
+                    className="rounded-lg border bg-muted/30 p-4"
+                  >
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {field.label}
+                    </dt>
+                    <dd className="mt-1 break-words font-medium">
+                      {field.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </>

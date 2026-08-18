@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authClient } from "@/lib/auth-client";
 
 export function UserRowActions({
@@ -89,26 +90,55 @@ export function UserRowActions({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>{item.name}</DialogTitle>
+            <DialogTitle className="font-bold text-primary">
+              {item.name}
+            </DialogTitle>
             <DialogDescription>
               Account identity and access information.
             </DialogDescription>
           </DialogHeader>
-          <dl className="grid gap-3 border-t pt-4 sm:grid-cols-2">
-            {[
-              ["Email", item.email],
-              ["Role", item.role],
-              ["Email status", item.emailVerified ? "Verified" : "Pending"],
-              ["Joined", item.createdAt.toLocaleString()],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-lg border bg-muted/30 p-4">
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {label}
-                </dt>
-                <dd className="mt-1 font-medium">{value}</dd>
-              </div>
-            ))}
-          </dl>
+          <Tabs defaultValue="overview">
+            <TabsList variant="line">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="security">Security</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview">
+              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                {[
+                  ["Email", item.email],
+                  ["Role", item.role],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="rounded-lg border bg-muted/30 p-4"
+                  >
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {label}
+                    </dt>
+                    <dd className="mt-1 font-medium">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </TabsContent>
+            <TabsContent value="security">
+              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                {[
+                  ["Email status", item.emailVerified ? "Verified" : "Pending"],
+                  ["Joined", item.createdAt.toLocaleString()],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="rounded-lg border bg-muted/30 p-4"
+                  >
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {label}
+                    </dt>
+                    <dd className="mt-1 font-medium">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </>

@@ -4,26 +4,89 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Save } from "lucide-react";
+import { UpdateConfirmDialog } from "@/components/confirm-action-dialog";
 
 export function ProfileForm({ name, email }: { name: string; email: string }) {
   const [pending, setPending] = useState(false);
+  const [pendingForm, setPendingForm] = useState<FormData | null>(null);
   async function submit(formData: FormData) {
     setPending(true);
     try {
       const nextName = String(formData.get("name")).trim();
       const result = await authClient.updateUser({ name: nextName });
-      if (result.error) return toast.error(result.error.message ?? "Could not update your profile.");
+      if (result.error)
+        return toast.error(
+          result.error.message ?? "Could not update your profile.",
+        );
       toast.success("Profile updated successfully.");
-    } catch { toast.error("Could not update your profile. Please try again."); }
-    finally { setPending(false); }
+    } catch {
+      toast.error("Could not update your profile. Please try again.");
+    } finally {
+      setPending(false);
+    }
   }
-  return <form onSubmit={(event) => { event.preventDefault(); void submit(new FormData(event.currentTarget)); }}><FieldGroup>
-    <Field><FieldLabel htmlFor="profile-name">Full name</FieldLabel><Input id="profile-name" name="name" defaultValue={name} placeholder="Your full name" minLength={2} required /></Field>
-    <Field data-disabled><FieldLabel htmlFor="profile-email">Gmail address</FieldLabel><Input id="profile-email" value={email} placeholder="you@gmail.com" disabled /><FieldDescription>Your verified Gmail address is the identity for this account.</FieldDescription></Field>
-    <Button type="submit" disabled={pending}>{pending ? <Spinner data-icon="inline-start" /> : <Save data-icon="inline-start" />}{pending ? "Saving…" : "Save profile"}</Button>
-  </FieldGroup></form>;
+  return (
+    <>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          setPendingForm(new FormData(event.currentTarget));
+        }}
+      >
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="profile-name">Full name</FieldLabel>
+            <Input
+              id="profile-name"
+              name="name"
+              defaultValue={name}
+              placeholder="Your full name"
+              minLength={2}
+              required
+            />
+          </Field>
+          <Field data-disabled>
+            <FieldLabel htmlFor="profile-email">Gmail address</FieldLabel>
+            <Input
+              id="profile-email"
+              value={email}
+              placeholder="you@gmail.com"
+              disabled
+            />
+            <FieldDescription>
+              Your verified Gmail address is the identity for this account.
+            </FieldDescription>
+          </Field>
+          <Button type="submit" disabled={pending}>
+            {pending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <Save data-icon="inline-start" />
+            )}
+            {pending ? "Saving…" : "Save profile"}
+          </Button>
+        </FieldGroup>
+      </form>
+      <UpdateConfirmDialog
+        open={Boolean(pendingForm)}
+        onOpenChange={(open) => !open && setPendingForm(null)}
+        entityName="your profile"
+        pending={pending}
+        onConfirm={async () => {
+          if (!pendingForm) return;
+          await submit(pendingForm);
+          setPendingForm(null);
+        }}
+      />
+    </>
+  );
 }

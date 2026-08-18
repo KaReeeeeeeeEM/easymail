@@ -11,6 +11,7 @@ const labels: Record<string, string> = {
   "/superadmin/workspaces": "Workspaces",
   "/superadmin/reports": "Reports",
   "/superadmin/audit-logs": "Audit logs",
+  "/superadmin/notifications": "Notifications",
 };
 export function AdminHeader({
   user,
