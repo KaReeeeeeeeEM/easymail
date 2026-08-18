@@ -28,11 +28,14 @@ function requestBody(values: PlaygroundValues) {
 function buildSamples(values: PlaygroundValues): Record<Language, string> {
   const body = requestBody(values);
   const fileNames = values.files.map((file) => file.name);
-  const attachmentShell = values.files.map((file, index) => `FILE_${index + 1}=$(base64 < ${JSON.stringify(file.name)} | tr -d '\\n')`).join("\n");
-  const attachmentData = values.files.map((file, index) => ({ filename: file.name, content: `__FILE_${index + 1}__`, contentType: file.type || "application/octet-stream" }));
-  const curlJson = JSON.stringify(values.files.length ? { ...body, attachments: attachmentData } : body)
-    .replace(/__FILE_(\d+)__/g, "${FILE_$1}")
-    .replaceAll('"', '\\"');
+  const attachmentData = values.files.map((file) => ({
+    filename: file.name,
+    content: "BASE64_ENCODED_CONTENT",
+    contentType: file.type || "application/octet-stream",
+  }));
+  const curlJson = JSON.stringify(
+    values.files.length ? { ...body, attachments: attachmentData } : body,
+  );
   const jsSetup = values.files.length
     ? `import { readFile } from "node:fs/promises";\n\nconst attachments = await Promise.all(${JSON.stringify(fileNames)}.map(async (filename) => ({\n  filename,\n  content: (await readFile(filename)).toString("base64"),\n})));\n\n`
     : "";
@@ -43,11 +46,11 @@ function buildSamples(values: PlaygroundValues): Record<Language, string> {
   const pythonBody = JSON.stringify(values.files.length ? { ...body, attachments: "__attachments__" } : body, null, 4).replace('"__attachments__"', "attachments");
 
   return {
-    curl: `${attachmentShell ? `${attachmentShell}\n\n` : ""}curl --request POST '${endpoint}' \\
+    curl: `curl --request POST '${endpoint}' \\
   --header "Authorization: Bearer $EASYMAIL_API_KEY" \\
   --header 'Content-Type: application/json' \\
   --header "Idempotency-Key: $(uuidgen)" \\
-  --data "${curlJson}"`,
+  --data-raw '${curlJson}'`,
     javascript: `${jsSetup}const response = await fetch("${endpoint}", {
   method: "POST",
   headers: {
