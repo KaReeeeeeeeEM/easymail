@@ -191,7 +191,7 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
                 [
                   "02",
                   "Connect an SMTP sender",
-                  "Add Gmail, Workspace, Outlook, or custom SMTP credentials and verify the connection.",
+                  "Choose Gmail, Yahoo, Zoho, Amazon SES, or authenticated custom SMTP and follow its provider-specific setup.",
                 ],
                 [
                   "03",
@@ -241,13 +241,15 @@ export function DocsContent({ embedded = false }: { embedded?: boolean }) {
             <SectionHeading
               kicker="Sender setup"
               title="Create provider credentials"
-              description="The platform sends through the sender you select. Use a provider-issued app password or SMTP credential—never your normal mailbox password."
+              description="The platform sends through the sender you select. Use the exact credential type required by that provider: an app password, an SMTP username/password pair, or OAuth where supported."
             />
             <div className="mt-7 grid gap-4">
-              <ProviderGuide title="Gmail and Google Workspace" steps="Open Google Account → Security and enable 2-Step Verification. Open App passwords, create one named Easymail, and copy the 16-character password. In SMTP senders choose Gmail, use smtp.gmail.com, port 465, SSL/TLS, and your complete Gmail address as both sender and username. Paste the app password without spaces and verify the connection." href="https://support.google.com/accounts/answer/185833" linkLabel="Google’s official app-password guide" />
-              <ProviderGuide title="Microsoft Outlook and Microsoft 365" steps="Enable two-step verification in Microsoft Security. From Advanced security options create an app password; work or school accounts may require an administrator to enable this method. Choose Outlook, use smtp.office365.com, port 587, STARTTLS, and the complete mailbox address as username. Paste the app password and verify." href="https://support.microsoft.com/en-US/accounts-billing/manage/how-to-get-and-use-app-passwords" linkLabel="Microsoft’s official app-password guide" />
-              <ProviderGuide title="Yahoo Mail" steps="Open Yahoo Account Security. Under External connections choose Create app password and name it Easymail. Choose Custom SMTP, use smtp.mail.yahoo.com, port 465, SSL/TLS, and the complete Yahoo address as username. Paste the generated password and verify." href="https://help.yahoo.com/kb/mail/generate-password-sln15241.html" linkLabel="Yahoo’s official app-password guide" />
-              <ProviderGuide title="Other SMTP providers" steps="Ask the provider for its outbound SMTP host, authenticated username, app-specific password, port, and encryption mode. Use port 465 with SSL/TLS or port 587 with STARTTLS. The From address must be authorized by that provider. Add the values under Custom SMTP and use Verify before saving." />
+              <ProviderGuide title="Gmail and Google Workspace mailbox" steps="Enable Google 2-Step Verification, create a 16-character App Password, and choose Gmail in the sender wizard. Use the complete Google mailbox as the username. EasyMail removes display spaces from the App Password before encrypting it. Google Workspace administrators may alternatively operate an IP-authenticated SMTP relay, but that relay mode is not supported by EasyMail's authenticated sender connection." href="https://support.google.com/mail/answer/185833" linkLabel="Google’s official app-password guide" />
+              <ProviderGuide title="Yahoo Mail" steps="Open Yahoo Account Security → External connections, generate a third-party app password, then choose Yahoo in the wizard. Use the complete Yahoo address as the SMTP username and the generated app password—not the normal account password." href="https://help.yahoo.com/kb/mail/generate-password-sln15241.html" linkLabel="Yahoo’s official app-password guide" />
+              <ProviderGuide title="Zoho Mail" steps="Choose the personal/free profile for smtp.zoho.com or the paid organization profile for smtppro.zoho.com. Use the complete mailbox address. A normal account password can work when TFA is off; when TFA or SAML is enabled, create and use a Zoho application-specific password." href="https://www.zoho.com/mail/help/zoho-smtp.html" linkLabel="Zoho’s official SMTP guide" />
+              <ProviderGuide title="Amazon SES SMTP" steps="In the SES console, choose the same AWS Region used in EasyMail and create SMTP credentials. SES SMTP usernames and passwords are region-specific and are different from AWS access keys. Verify the From identity or domain in that region before sending." href="https://docs.aws.amazon.com/ses/latest/dg/smtp-credentials.html" linkLabel="AWS’s official SES SMTP credential guide" />
+              <ProviderGuide title="Microsoft 365" steps="Microsoft Exchange Online requires Modern Authentication (OAuth 2.0) for dependable SMTP AUTH integrations; app passwords and ordinary mailbox passwords are not a supported replacement for OAuth. EasyMail therefore disables Microsoft 365 in the password-based sender wizard until its interactive OAuth connection is available." href="https://learn.microsoft.com/en-us/exchange/clients-and-mobile-in-exchange-online/deprecation-of-basic-authentication-exchange-online" linkLabel="Microsoft’s official authentication guidance" />
+              <ProviderGuide title="Other SMTP providers" steps="Ask the provider for its authenticated outbound SMTP host, username, password or app-specific password, port, and encryption mode. Use port 465 with SSL/TLS or port 587 with STARTTLS. EasyMail verifies the connection before encrypting the credential and does not support anonymous or IP-allowlisted relays." />
             </div>
           </section>
           <DocSeparator />

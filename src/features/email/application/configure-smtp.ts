@@ -13,6 +13,7 @@ import { encryptCredential } from "@/features/email/infrastructure/credential-cr
 import { auth } from "@/lib/auth";
 
 const schema = z.object({
+  provider: z.enum(["gmail", "yahoo", "zoho", "zoho-org", "ses", "custom"]),
   label: z.string().trim().min(2).max(80),
   host: z.string().trim().min(1).max(253),
   port: z.coerce.number().int().min(1).max(65535),
@@ -41,6 +42,25 @@ export async function configureSmtp(formData: FormData): Promise<ActionResult> {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { success: false, message: parsed.error.issues[0]?.message ?? "Check the sender details." };
   const values = parsed.data;
+  const providerHosts: Partial<Record<typeof values.provider, string>> = {
+    gmail: "smtp.gmail.com",
+    yahoo: "smtp.mail.yahoo.com",
+    zoho: "smtp.zoho.com",
+    "zoho-org": "smtppro.zoho.com",
+  };
+  const expectedHost = providerHosts[values.provider];
+  if (expectedHost && values.host !== expectedHost) {
+    return { success: false, message: `Use ${expectedHost} for the selected provider.` };
+  }
+  if (values.provider === "ses" && !/^email-smtp\.[a-z0-9-]+\.amazonaws\.com$/.test(values.host)) {
+    return { success: false, message: "Select a valid Amazon SES SMTP region." };
+  }
+  if ((values.port === 465) !== values.secure) {
+    return { success: false, message: "Use SSL/TLS with port 465, or STARTTLS with ports 587, 2525, and 25." };
+  }
+  const password = values.provider === "gmail"
+    ? values.password.replaceAll(" ", "")
+    : values.password;
   const existingSenders = await db
     .select({ id: smtpConfiguration.id })
     .from(smtpConfiguration)
@@ -54,7 +74,7 @@ export async function configureSmtp(formData: FormData): Promise<ActionResult> {
       host: values.host,
       port: values.port,
       secure: values.secure,
-      auth: { user: values.username, pass: values.password },
+      auth: { user: values.username, pass: password },
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,
       socketTimeout: 20_000,
@@ -76,7 +96,7 @@ export async function configureSmtp(formData: FormData): Promise<ActionResult> {
       senderName: values.senderName,
       senderEmail: values.senderEmail,
       username: values.username,
-      encryptedPassword: encryptCredential(values.password),
+      encryptedPassword: encryptCredential(password),
       isDefault: makeDefault,
       lastVerifiedAt: new Date(),
     });

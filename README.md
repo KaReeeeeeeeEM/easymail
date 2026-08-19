@@ -11,7 +11,7 @@
   <a href="./LICENSE">License</a>
 </p>
 
-EasyMail turns Gmail, Google Workspace, Outlook, or any standards-compliant SMTP account into a stable HTTPS email service. Teams configure and verify senders once, issue rotatable API keys, and send transactional email from any application without rebuilding Nodemailer infrastructure.
+EasyMail turns Gmail, Google Workspace mailboxes, Yahoo, Zoho, Amazon SES, or an authenticated standards-compliant SMTP account into a stable HTTPS email service. Teams configure and verify senders once, issue rotatable API keys, and send transactional email from any application without rebuilding Nodemailer infrastructure. Microsoft 365 password authentication is intentionally disabled until the platform provides its required OAuth 2.0 connection flow.
 
 ## What EasyMail provides
 
